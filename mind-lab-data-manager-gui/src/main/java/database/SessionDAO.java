@@ -3,10 +3,7 @@ package database;
 import app.Config;
 import model.Session;
 
-import java.sql.Connection;
-import java.sql.Date;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,17 +43,17 @@ public class SessionDAO {
 
     public static void update(Session s) {
 
-        String sql = "UPDATE sesija SET datum = ?, laboratorija_id = ? WHERE sesija_id = ?";
+        String sql = "{CALL sp_insert_session(?,?,?)}";
 
         try {
             Connection conn = Config.getConnection();
-            PreparedStatement ps = conn.prepareStatement(sql);
+            CallableStatement cs = conn.prepareCall(sql);
 
-            ps.setDate(1, Date.valueOf(s.getDatum()));
-            ps.setInt(2, s.getLabId());
-            ps.setInt(3, s.getId());
+            cs.setString(1, s.getDatum());
+            cs.setString(2, s.getVreme());
+            cs.setInt(3, s.getLabId());
 
-            ps.executeUpdate();
+            cs.execute();
 
         } catch (Exception e) {
             e.printStackTrace();

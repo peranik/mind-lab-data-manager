@@ -44,27 +44,17 @@ public class AdminDashboard {
         );
         delete.setOnAction(e -> {
 
-            Laboratory lab = table.getSelectionModel().getSelectedItem();
+            Laboratory l = table.getSelectionModel().getSelectedItem();
 
-            if (lab != null) {
+            if (l != null) {
 
-                boolean hasResearchers =
-                        ResearcherDAO.existsInLab(lab.getId());
-
-                if (hasResearchers) {
-
-                    Alert alert = new Alert(Alert.AlertType.WARNING);
-                    alert.setContentText(
-                            "Ne možeš obrisati laboratoriju - ima istraživača!"
-                    );
-                    alert.show();
-
+                if (!LaboratoryDAO.existsInLab(l.getId())) {
+                    LaboratoryDAO.delete(l.getId());
                 } else {
-
-                    LaboratoryDAO.delete(lab.getId());
-
-                    table.getItems().remove(lab);
+                    System.out.println("Ne možeš obrisati laboratoriju - postoje istraživači!");
                 }
+
+                table.refresh();
             }
         });
 
@@ -195,11 +185,23 @@ public class AdminDashboard {
         Button delete = new Button("Delete");
 
         edit.setOnAction(e -> {
-            Session s = table.getSelectionModel().getSelectedItem();
-            if (s != null) {
-                System.out.println("OPEN EDIT FORM");
-                // ovde kasnije otvaraš edit screen
+            Session selected = table.getSelectionModel().getSelectedItem();
+
+            if (selected == null) {
+                System.out.println("Nijedna sesija nije selektovana!");
+                return;
             }
+
+            System.out.println("OPEN EDIT FORM za ID: " + selected.getId());
+
+            SessionEditForm form = new SessionEditForm(selected);
+
+            form.setOnSave(updated -> {
+                SessionDAO.update(updated);   // UPDATE u bazi
+                table.setItems(FXCollections.observableArrayList(SessionDAO.getAll()));
+            });
+
+            form.show();
         });
 
         delete.setOnAction(e -> {

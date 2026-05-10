@@ -3,6 +3,7 @@ package database;
 import app.Config;
 import model.Laboratory;
 
+import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -57,24 +58,42 @@ public class LaboratoryDAO {
         }
     }
 
-    public static void delete(int id) {
+    public static void delete(int labId) {
 
-        String sql =
-                "DELETE FROM laboratorija WHERE laboratorija_id = ?";
+        String sql = "{CALL sp_delete_laboratory(?)}";
 
         try {
-
             Connection conn = Config.getConnection();
+            CallableStatement cs = conn.prepareCall(sql);
 
-            PreparedStatement ps =
-                    conn.prepareStatement(sql);
-
-            ps.setInt(1, id);
-
-            ps.executeUpdate();
+            cs.setInt(1, labId);
+            cs.execute();
 
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public static boolean existsInLab(int labId) {
+
+        String sql = "SELECT fn_lab_can_delete(?)";
+
+        try {
+            Connection conn = Config.getConnection();
+            PreparedStatement ps = conn.prepareStatement(sql);
+
+            ps.setInt(1, labId);
+
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                return rs.getBoolean(1);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return false;
     }
 }

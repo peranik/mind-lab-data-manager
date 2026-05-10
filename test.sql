@@ -195,6 +195,109 @@ CREATE TABLE dizajner_anketa (
         ON UPDATE CASCADE ON DELETE CASCADE
 );
 
+
+
+-- PRVO IDU FUNKCIJE
+
+CREATE VIEW lab_stats AS
+SELECT 
+    l.lab_id,
+    l.naziv,
+    COUNT(a.alat_id) AS broj_alata,
+    COUNT(r.istrazivac_id) AS broj_istrazivaca
+FROM laboratorija l
+LEFT JOIN alat a ON l.lab_id = a.lab_id
+LEFT JOIN istrazivac r ON l.lab_id = r.lab_id
+GROUP BY l.lab_id, l.naziv
+HAVING COUNT(a.alat_id) >= 0;
+
+DELIMITER //
+
+CREATE FUNCTION fn_lab_can_delete(p_lab_id INT)
+RETURNS BOOLEAN
+DETERMINISTIC
+BEGIN
+    DECLARE cnt INT;
+
+    SELECT COUNT(*) INTO cnt
+    FROM istrazivac
+    WHERE lab_id = p_lab_id;
+
+    RETURN cnt = 0;
+END //
+
+DELIMITER ;
+
+DELIMITER //
+
+CREATE PROCEDURE sp_delete_laboratory(IN p_lab_id INT)
+BEGIN
+    DECLARE can_delete BOOLEAN;
+
+    START TRANSACTION;
+
+    -- 1. SELECT operacija u varijablu
+    SET can_delete = fn_lab_can_delete(p_lab_id);
+
+    -- 2. logika + DELETE
+    IF can_delete THEN
+        
+        DELETE FROM alat WHERE lab_id = p_lab_id;
+        DELETE FROM sesija WHERE lab_id = p_lab_id;
+        DELETE FROM laboratorija WHERE lab_id = p_lab_id;
+
+    ELSE
+        ROLLBACK;
+    END IF;
+
+    COMMIT;
+END //
+
+DELIMITER ;
+
+DELIMITER //
+
+CREATE FUNCTION fn_test_lab_can_delete()
+RETURNS BOOLEAN
+DETERMINISTIC
+BEGIN
+    DECLARE ok BOOLEAN DEFAULT TRUE;
+
+    -- test 1
+    IF fn_lab_can_delete(1) NOT IN (0,1) THEN SET ok = FALSE; END IF;
+
+    -- test 2
+    IF fn_lab_can_delete(2) NOT IN (0,1) THEN SET ok = FALSE; END IF;
+
+    -- test 3
+    IF fn_lab_can_delete(3) NOT IN (0,1) THEN SET ok = FALSE; END IF;
+
+    -- test 4
+    IF fn_lab_can_delete(4) NOT IN (0,1) THEN SET ok = FALSE; END IF;
+
+    -- test 5
+    IF fn_lab_can_delete(5) NOT IN (0,1) THEN SET ok = FALSE; END IF;
+
+    RETURN ok;
+END //
+
+DELIMITER ;
+
+DELIMITER //
+
+CREATE PROCEDURE sp_update_session(
+    IN p_id INT,
+    IN p_datum VARCHAR(50),
+    IN p_vreme VARCHAR(50)
+)
+BEGIN
+    UPDATE sesija
+    SET datum = p_datum,
+        vreme = p_vreme
+    WHERE id = p_id;
+END;
+
+DELIMITER;
 -- ============================================
 -- INSERTS ZA MIND_LAB_DATA_MANAGER
 -- 100+ redova po tabeli

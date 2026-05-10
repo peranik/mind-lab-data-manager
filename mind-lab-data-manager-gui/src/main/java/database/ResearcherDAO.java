@@ -62,27 +62,4 @@ public class ResearcherDAO {
             e.printStackTrace();
         }
     }
-
-    public static boolean existsInLab(int labId) {
-
-        String sql = "SELECT COUNT(*) FROM istrazivac WHERE lab_id = ?";
-
-        try {
-            Connection conn = Config.getConnection();
-            PreparedStatement ps = conn.prepareStatement(sql);
-
-            ps.setInt(1, labId);
-
-            ResultSet rs = ps.executeQuery();
-
-            if (rs.next()) {
-                return rs.getInt(1) > 0;
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return false;
-    }
 }

@@ -17,4 +17,20 @@ public class Session {
     public String getDatum() { return datum; }
     public String getVreme() { return vreme; }
     public int getLabId() { return labId; }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public void setDatum(String datum) {
+        this.datum = datum;
+    }
+
+    public void setVreme(String vreme) {
+        this.vreme = vreme;
+    }
+
+    public void setLabId(int labId) {
+        this.labId = labId;
+    }
 }
