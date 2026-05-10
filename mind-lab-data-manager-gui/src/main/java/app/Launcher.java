@@ -18,7 +18,7 @@ public class Launcher {
 
     }
 
-    void launch(String... args) {
+    public void launch(String... args) {
         this.setUp(args);
         this.work(args);
         this.clean(args);
