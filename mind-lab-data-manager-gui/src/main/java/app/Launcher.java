@@ -24,14 +24,18 @@ public class Launcher {
         this.clean(args);
     }
 
-    private void setUp(String... args) {
-        Config.loadProperties(args[0]);
-        String host = Config.getPropertyValue("host", "");
-        String port = Config.getPropertyValue("port", "");
-        String db = Config.getPropertyValue("db", "");
-        String user = Config.getPropertyValue("user", "");
-        String password = Config.getPropertyValue("password", "");
-        Config.connect(host, port, db, user, password);
+    public static void setUp(String... args) {
+        String cfgFile = "database.cfg"; // <- FIX
+
+        Config.loadProperties(cfgFile);
+
+        Config.connect(
+                Config.getPropertyValue("host", "localhost"),
+                Config.getPropertyValue("port", "3306"),
+                Config.getPropertyValue("db", ""),
+                Config.getPropertyValue("user", ""),
+                Config.getPropertyValue("password", "")
+        );
     }
 
     private void work(String... args) {

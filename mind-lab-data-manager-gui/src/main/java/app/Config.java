@@ -13,11 +13,20 @@ public class Config {
     private static Connection connection;
 
     public static void connect(String host, String port, String db, String user, String password) {
-        String url = "jdbc:mysql://" + host + ":" + port + "/" + db;
+        String url =
+                "jdbc:mysql://" + host + ":" + port + "/" + db +
+                        "?useSSL=false&serverTimezone=UTC";
+
+        System.out.println("=== DB CONNECT START ===");
+        System.out.println("URL: " + url);
+        System.out.println("USER: " + user);
+
         try {
             connection = DriverManager.getConnection(url, user, password);
+            System.out.println("CONNECTED OK");
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
+            throw new RuntimeException("DB FAIL");
         }
     }
 

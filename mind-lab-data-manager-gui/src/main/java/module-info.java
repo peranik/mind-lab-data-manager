@@ -4,5 +4,6 @@ module artikli {
     requires javafx.base;
     requires java.sql;
     requires mysql.connector.j;
+    opens model to javafx.base;
     exports app;
 }
