@@ -25,7 +25,7 @@ public class Launcher {
     }
 
     public static void setUp(String... args) {
-        String cfgFile = "database.cfg"; // <- FIX
+        String cfgFile = "database.cfg";
 
         Config.loadProperties(cfgFile);
 

@@ -199,17 +199,15 @@ CREATE TABLE dizajner_anketa (
 
 -- PRVO IDU FUNKCIJE
 
-CREATE VIEW lab_stats AS
-SELECT 
-    l.lab_id,
-    l.naziv,
-    COUNT(a.alat_id) AS broj_alata,
-    COUNT(r.istrazivac_id) AS broj_istrazivaca
-FROM laboratorija l
-LEFT JOIN alat a ON l.lab_id = a.lab_id
-LEFT JOIN istrazivac r ON l.lab_id = r.lab_id
-GROUP BY l.lab_id, l.naziv
-HAVING COUNT(a.alat_id) >= 0;
+
+-- CREATE VIEW lab_stats AS
+-- SELECT 
+--    l.lab_id,
+--    l.naziv,
+--    COUNT(a.alat_id) AS broj_alata
+-- FROM laboratorija l
+-- LEFT JOIN alat a ON l.lab_id = a.lab_id
+-- GROUP BY l.lab_id, l.naziv;
 
 DELIMITER //
 
@@ -297,7 +295,7 @@ BEGIN
     WHERE id = p_id;
 END;
 
-DELIMITER;
+DELIMITER ;
 -- ============================================
 -- INSERTS ZA MIND_LAB_DATA_MANAGER
 -- 100+ redova po tabeli
