@@ -8,6 +8,8 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.VBox;
 import model.*;
 
+import java.util.List;
+
 public class AdminDashboard {
 
     public Parent getRoot() {
@@ -35,6 +37,9 @@ public class AdminDashboard {
         TableColumn<Laboratory, String> c2 = new TableColumn<>("Naziv");
         c2.setCellValueFactory(new PropertyValueFactory<>("naziv"));
 
+        TableColumn<Laboratory, TextField> c3 = new TableColumn<>("Naziv");
+        c3.setCellValueFactory(new PropertyValueFactory<>("tf"));
+
         table.getColumns().addAll(c1, c2);
 
         table.setItems(
@@ -50,11 +55,15 @@ public class AdminDashboard {
 
                 if (!LaboratoryDAO.existsInLab(l.getId())) {
                     LaboratoryDAO.delete(l.getId());
+                    List<Laboratory> updatedList = LaboratoryDAO.getAll();
+
+                    System.out.println("Broj laboratorija nakon brisanja: " + updatedList.size());
+
+                    //table.setItems(FXCollections.observableArrayList(updatedList));
+                    table.getItems().remove(l);
                 } else {
                     System.out.println("Ne možeš obrisati laboratoriju - postoje istraživači!");
                 }
-
-                table.refresh();
             }
         });
 

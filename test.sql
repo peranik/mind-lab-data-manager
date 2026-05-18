@@ -216,39 +216,32 @@ RETURNS BOOLEAN
 DETERMINISTIC
 BEGIN
     DECLARE cnt INT;
-
-    SELECT COUNT(*) INTO cnt
-    FROM istrazivac
+    SELECT COUNT(DISTINCT istrazivac_id) INTO cnt
+    FROM izvodjenje_izvodjac
     WHERE lab_id = p_lab_id;
-
+    
     RETURN cnt = 0;
 END //
 
 DELIMITER ;
+
+DROP PROCEDURE IF EXISTS sp_delete_laboratory;
 
 DELIMITER //
 
 CREATE PROCEDURE sp_delete_laboratory(IN p_lab_id INT)
 BEGIN
     DECLARE can_delete BOOLEAN;
-
-    START TRANSACTION;
-
-    -- 1. SELECT operacija u varijablu
     SET can_delete = fn_lab_can_delete(p_lab_id);
-
-    -- 2. logika + DELETE
     IF can_delete THEN
-        
+        START TRANSACTION;
         DELETE FROM alat WHERE lab_id = p_lab_id;
         DELETE FROM sesija WHERE lab_id = p_lab_id;
+        DELETE FROM izvodjenje WHERE lab_id = p_lab_id;
+        DELETE FROM ucesce WHERE lab_id = p_lab_id;
         DELETE FROM laboratorija WHERE lab_id = p_lab_id;
-
-    ELSE
-        ROLLBACK;
+        COMMIT;
     END IF;
-
-    COMMIT;
 END //
 
 DELIMITER ;

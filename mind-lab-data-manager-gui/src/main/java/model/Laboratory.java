@@ -1,9 +1,12 @@
 package model;
 
+import javafx.scene.control.TextField;
+
 public class Laboratory {
 
     private int id;
     private String naziv;
+    private TextField tf = new TextField();
 
     public Laboratory(int id, String naziv) {
         this.id = id;
@@ -16,5 +19,10 @@ public class Laboratory {
 
     public String getNaziv() {
         return naziv;
+    }
+
+    public TextField getTf() {
+        tf.setText(naziv);
+        return tf;
     }
 }

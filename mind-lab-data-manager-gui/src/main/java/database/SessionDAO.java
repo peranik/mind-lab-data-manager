@@ -43,7 +43,7 @@ public class SessionDAO {
 
     public static void update(Session s) {
 
-        String sql = "{CALL sp_insert_session(?,?,?)}";
+        String sql = "{CALL sp_update_session(?,?,?)}";
 
         try {
             Connection conn = Config.getConnection();
