@@ -196,6 +196,21 @@ CREATE TABLE dizajner_anketa (
 );
 
 
+--View se dodaje da bi se mogao pogledati spisak imena dizajnera koji su dizajnirali upitnike
+--Veoma je bitno da mogu da se pogledaju dizajneri koji su dizajnirali upitnike
+
+DROP VIEW IF EXISTS view_dizajneri_upitnika;
+CREATE VIEW view_dizajneri_upitnika
+AS SELECT DISTINCT istrazivac.naziv -- ,tip_ankete.naziv
+AS stvaraoci_upitnika FROM tip_ankete
+INNER JOIN anketa ON tip_ankete.tip_id=anketa.tip_id
+INNER JOIN dizajner_anketa ON anketa.anketa_id=dizajner_anketa.anketa_id
+INNER JOIN dizajner on dizajner_anketa.istrazivac_id=dizajner.istrazivac_id
+INNER JOIN istrazivac on dizajner.istrazivac_id=istrazivac.istrazivac_id
+WHERE tip_ankete.naziv LIKE "Upitnik"
+GROUP BY tip_ankete.naziv,istrazivac.naziv ORDER BY istrazivac.naziv asc;
+-- SELECT * FROM view_dizajneri_upitnika;
+
 
 -- PRVO IDU FUNKCIJE
 
@@ -366,7 +381,7 @@ INSERT INTO tip_ankete (naziv) VALUES
 ('Patient satisfaction'),
 ('Clinical audit'),
 ('Service evaluation'),
-('Needs assessment'),
+('Needs assessment'),	
 ('Benchmark studija'),
 ('Comparative studija'),
 ('Feasibility studija'),
@@ -1933,25 +1948,3 @@ INSERT INTO dizajner_anketa (anketa_id, istrazivac_id) VALUES
 (41, 70), (42, 72), (43, 74), (44, 76),
 (45, 78), (46, 80), (47, 82), (48, 84),
 (49, 86), (50, 88);
-
-SELECT * FROM tip_ankete;
-SELECT * FROM anketa;
-SELECT * FROM laboratorija;
-SELECT * FROM onlajn_centar;
-SELECT * FROM institut;
-SELECT * FROM ucesnik;
-SELECT * FROM ucesce;
-SELECT * FROM tip_alata;
-SELECT * FROM alat;
-SELECT * FROM tip_teorije;
-SELECT * FROM teorija;
-SELECT * FROM izvodjenje;
-SELECT * FROM sesija;
-SELECT * FROM alat_sesija;
-SELECT * FROM sesija_ucesnik;
-SELECT * FROM istrazivac;
-SELECT * FROM dizajner;
-SELECT * FROM izvodjac;
-SELECT * FROM anketa_teorija;
-SELECT * FROM izvodjenje_izvodjac;
-SELECT * FROM dizajner_anketa;

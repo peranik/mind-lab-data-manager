@@ -40,18 +40,10 @@ public class Config {
 
     public static void loadProperties(String cfgFile) {
         properties = new Properties();
-        FileInputStream fileInputStream = null;
-        try {
-            fileInputStream = new FileInputStream(cfgFile);
+        try (FileInputStream fileInputStream = new FileInputStream(cfgFile)) {
             properties.load(fileInputStream);
         } catch (IOException e) {
-            throw new RuntimeException(e);
-        } finally {
-            try {
-                fileInputStream.close();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+            throw new RuntimeException("Could not load config file: " + cfgFile, e);
         }
     }
 
