@@ -49,6 +49,9 @@ public class SesijaEksperimentView {
         colLab.setCellValueFactory(new PropertyValueFactory<>("nazivLaboratorije"));
 
         // ===== TABLE =====
+        table.getColumns().addAll(
+                colDatum,colPocetak,colKraj,colStatus,colAnketa,colLab
+        );
 
         table.setItems(FXCollections.observableArrayList(
                 SesijaEksperimentDAO.getAll()
