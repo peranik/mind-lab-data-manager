@@ -15,11 +15,10 @@ public class SesijaEksperimentDAO {
 
         List<SesijaEksperiment> list = new ArrayList<>();
 
-        try (
-                Connection conn = Config.getConnection();
-                PreparedStatement ps = conn.prepareStatement(sql);
-                ResultSet rs = ps.executeQuery()
-        ) {
+        try {
+            Connection conn = Config.getConnection();
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ResultSet rs = ps.executeQuery();
 
             while (rs.next()) {
 
@@ -32,6 +31,9 @@ public class SesijaEksperimentDAO {
                         rs.getString("naziv_laboratorije")
                 ));
             }
+
+            rs.close();
+            ps.close();
 
         } catch (SQLException e) {
             e.printStackTrace();

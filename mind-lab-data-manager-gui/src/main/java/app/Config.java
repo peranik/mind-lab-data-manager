@@ -13,6 +13,14 @@ public class Config {
     private static Connection connection;
 
     public static void connect(String host, String port, String db, String user, String password) {
+        try {
+            if (connection != null && !connection.isClosed()) {
+                return;
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Could not verify existing DB connection", e);
+        }
+
         String url =
                 "jdbc:mysql://" + host + ":" + port + "/" + db +
                         "?useSSL=false&serverTimezone=UTC";
@@ -32,7 +40,10 @@ public class Config {
 
     public static void disconnect() {
         try {
-            connection.close();
+            if (connection != null && !connection.isClosed()) {
+                connection.close();
+            }
+            connection = null;
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }

@@ -21,7 +21,6 @@ public class Launcher {
     public void launch(String... args) {
         this.setUp(args);
         this.work(args);
-        this.clean(args);
     }
 
     public static void setUp(String... args) {
@@ -41,9 +40,4 @@ public class Launcher {
     private void work(String... args) {
         App.launch(App.class, args);
     }
-
-    private void clean(String... args) {
-        Config.disconnect();
-    }
-
 }

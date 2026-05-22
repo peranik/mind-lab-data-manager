@@ -54,8 +54,6 @@ public class SesijaEksperimentView {
                 SesijaEksperimentDAO.getAll()
         ));
 
-        table.getItems().addAll(SesijaEksperimentDAO.getAll());
-
         VBox root = new VBox(table);
 
         Scene scene = new Scene(root, 900, 500);
