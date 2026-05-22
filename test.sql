@@ -196,8 +196,8 @@ CREATE TABLE dizajner_anketa (
 );
 
 
---View se dodaje da bi se mogao pogledati spisak imena dizajnera koji su dizajnirali upitnike
---Veoma je bitno da mogu da se pogledaju dizajneri koji su dizajnirali upitnike
+-- View se dodaje da bi se mogao pogledati spisak imena dizajnera koji su dizajnirali upitnike
+-- Veoma je bitno da mogu da se pogledaju dizajneri koji su dizajnirali upitnike
 
 DROP VIEW IF EXISTS view_dizajneri_upitnika;
 CREATE VIEW view_dizajneri_upitnika
@@ -209,7 +209,27 @@ INNER JOIN dizajner on dizajner_anketa.istrazivac_id=dizajner.istrazivac_id
 INNER JOIN istrazivac on dizajner.istrazivac_id=istrazivac.istrazivac_id
 WHERE tip_ankete.naziv LIKE "Upitnik"
 GROUP BY tip_ankete.naziv,istrazivac.naziv ORDER BY istrazivac.naziv asc;
+
 -- SELECT * FROM view_dizajneri_upitnika;
+
+DROP VIEW IF EXISTS pregled_sesija_eksperimenata;
+CREATE VIEW pregled_sesija_eksperimenata AS
+SELECT izvodjenje.datum,
+sesija.vreme_pocetka, sesija.vreme_zavrsetka,
+izvodjenje.status AS status_izvodjenja,
+anketa.naziv AS naziv_ankete, laboratorija.naziv AS naziv_laboratorije
+FROM sesija
+JOIN izvodjenje
+ON sesija.lab_id = izvodjenje.lab_id
+AND sesija.datum_izvodjenja = izvodjenje.datum
+AND sesija.vreme = izvodjenje.vreme
+JOIN anketa
+ON izvodjenje.anketa_id = anketa.anketa_id
+JOIN laboratorija
+ON  laboratorija.lab_id=izvodjenje.lab_id
+ORDER BY sesija.datum ASC,vreme_pocetka ASC, vreme_zavrsetka DESC;
+-- SELECT * FROM pregled_sesija_eksperimenata;
+
 
 
 -- PRVO IDU FUNKCIJE
