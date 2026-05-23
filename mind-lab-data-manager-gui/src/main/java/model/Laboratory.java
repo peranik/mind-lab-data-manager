@@ -25,4 +25,8 @@ public class Laboratory {
         tf.setText(naziv);
         return tf;
     }
+    @Override
+    public String toString(){
+        return naziv;
+    }
 }

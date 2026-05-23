@@ -68,12 +68,12 @@ CREATE TABLE alat (
     alat_id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
     datum_nabavke DATE NOT NULL,
     datum_proizvodnje DATE,
-    lab_id INT NOT NULL,
+    lab_id INT,
     tip_alata_id INT NOT NULL,
 	FOREIGN KEY (tip_alata_id) REFERENCES tip_alata(tip_alata_id)
 		ON UPDATE CASCADE,
 	FOREIGN KEY (lab_id) REFERENCES laboratorija(lab_id)
-    ON UPDATE CASCADE
+    ON UPDATE CASCADE ON DELETE SET NULL
 );
 
 CREATE TABLE tip_teorije (
@@ -82,7 +82,7 @@ CREATE TABLE tip_teorije (
 );
 
 CREATE TABLE teorija (
-	
+
     teorija_id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
     naziv VARCHAR(50) NOT NULL,
     opis VARCHAR(1000),
@@ -226,62 +226,54 @@ JOIN laboratorija
     ON izvodjenje.lab_id = laboratorija.lab_id
 ORDER BY
     izvodjenje.datum ASC,
+    sesija.sesija_id ASC,
     sesija.vreme_pocetka ASC,
     sesija.vreme_zavrsetka DESC;
 -- SELECT * FROM pregled_sesija_eksperimenata;
 
 
 
--- PRVO IDU FUNKCIJE
+-- FUNKCIJA KOJA PROVERAVA DA LI LABORATORIJA MOZE BITI OBRISANA
+DELIMITER $$
 
-
--- CREATE VIEW lab_stats AS
--- SELECT
---    l.lab_id,
---    l.naziv,
---    COUNT(a.alat_id) AS broj_alata
--- FROM laboratorija l
--- LEFT JOIN alat a ON l.lab_id = a.lab_id
--- GROUP BY l.lab_id, l.naziv;
-
-DELIMITER //
-
-CREATE FUNCTION fn_lab_can_delete(p_lab_id INT)
+CREATE FUNCTION can_delete_laboratorija(labBrisanje INT)
 RETURNS BOOLEAN
 DETERMINISTIC
 BEGIN
     DECLARE cnt INT;
-    SELECT COUNT(DISTINCT istrazivac_id) INTO cnt
-    FROM izvodjenje_izvodjac
-    WHERE lab_id = p_lab_id;
+
+    SELECT COUNT(istrazivac_id) INTO cnt
+    FROM laboratorija
+    INNER JOIN izvodjenje on laboratorija.lab_id=izvodjenje.lab_id
+    INNER JOIN izvodjenje_izvodjac ON izvodjenje.izvodjenje_id=izvodjenje_izvodjac.izvodjenje_id
+    WHERE laboratorija.lab_id=labBrisanje;
 
     RETURN cnt = 0;
-END //
-
+END $$
 DELIMITER ;
+-- PROCEDURA KOJA BRISE LABORATORIJU AKO JE TO DOZVOLJENO PRETHODNOM FUNKCIJOM
+DROP PROCEDURE IF EXISTS delete_laboratory;
+DELIMITER $$
 
-DROP PROCEDURE IF EXISTS sp_delete_laboratory;
-
-DELIMITER //
-
-CREATE PROCEDURE sp_delete_laboratory(IN p_lab_id INT)
+CREATE PROCEDURE delete_laboratory(IN labBrisanje INT, OUT rezultat BOOL)
 BEGIN
-    DECLARE can_delete BOOLEAN;
-    SET can_delete = fn_lab_can_delete(p_lab_id);
-    IF can_delete THEN
+	DECLARE brisanje BOOLEAN;
+    SET rezultat=FALSE;
+    SET brisanje = can_delete_laboratorija(labBrisanje);
+    IF brisanje THEN
         START TRANSACTION;
-        DELETE FROM alat WHERE lab_id = p_lab_id;
-        DELETE FROM sesija WHERE lab_id = p_lab_id;
-        DELETE FROM izvodjenje WHERE lab_id = p_lab_id;
-        DELETE FROM ucesce WHERE lab_id = p_lab_id;
-        DELETE FROM laboratorija WHERE lab_id = p_lab_id;
+        DELETE FROM laboratorija
+        WHERE lab_id = labBrisanje;
+        SET rezultat = TRUE;
         COMMIT;
     END IF;
-END //
+END $$
 
 DELIMITER ;
 
-DELIMITER //
+DELIMITER $$
+
+-- FUNKCIJA KOJA TESTIRA FUNKCIJU ZA BRISANJE LABORATORIJE
 
 CREATE FUNCTION fn_test_lab_can_delete()
 RETURNS BOOLEAN
@@ -305,7 +297,7 @@ BEGIN
     IF fn_lab_can_delete(5) NOT IN (0,1) THEN SET ok = FALSE; END IF;
 
     RETURN ok;
-END //
+END $$
 
 DELIMITER ;
 

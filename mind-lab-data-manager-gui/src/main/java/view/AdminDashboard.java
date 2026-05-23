@@ -23,7 +23,8 @@ public class AdminDashboard {
         vboxDugmici.setSpacing(20);
         hBox.getChildren().addAll(vboxDugmici);
         Button btnSesAnk=btnPregledSesijaAnketa();
-        vboxDugmici.getChildren().add(btnSesAnk);
+        Button btnPregLab=btnPregledLaboratorija();
+        vboxDugmici.getChildren().addAll(btnSesAnk,btnPregLab);
         return hBox;
     }
     private Button btnPregledSesijaAnketa(){
@@ -35,5 +36,15 @@ public class AdminDashboard {
             form.show();
         });
         return btnPregledSesijaAnketa;
+    }
+    private Button btnPregledLaboratorija(){
+        Button btnPregledLaboratorija = new Button();
+        btnPregledLaboratorija.setText("Pregled Laboratorija");
+        btnPregledLaboratorija.setPrefWidth(400);
+        btnPregledLaboratorija.setOnAction(e -> {
+            LaboratorijaView form = new LaboratorijaView();
+            form.show();
+        });
+        return btnPregledLaboratorija;
     }
 }
