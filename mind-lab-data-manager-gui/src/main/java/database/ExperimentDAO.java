@@ -17,14 +17,10 @@ public class ExperimentDAO {
 
         String sql = "SELECT anketa_id, naziv, tip_id FROM anketa";
 
-        try {
-            Connection conn = Config.getConnection();
-            PreparedStatement ps = conn.prepareStatement(sql);
-
-            ResultSet rs = ps.executeQuery();
-
+        try (Connection conn = Config.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
-
                 Experiment e = new Experiment(
                         rs.getInt("anketa_id"),
                         rs.getString("naziv"),
@@ -47,10 +43,8 @@ public class ExperimentDAO {
 
         String sql = "INSERT INTO anketa (naziv, tip_id) VALUES (?, ?)";
 
-        try {
-            Connection conn = Config.getConnection();
-            PreparedStatement ps = conn.prepareStatement(sql);
-
+        try (Connection conn = Config.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, naziv);
             ps.setInt(2, tipId);
 
@@ -65,10 +59,8 @@ public class ExperimentDAO {
 
         String sql = "DELETE FROM anketa WHERE anketa_id = ?";
 
-        try {
-            Connection conn = Config.getConnection();
-            PreparedStatement ps = conn.prepareStatement(sql);
-
+        try (Connection conn = Config.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, id);
             ps.executeUpdate();
 

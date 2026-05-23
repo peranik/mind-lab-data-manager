@@ -17,14 +17,10 @@ public class ResearcherDAO {
 
         String sql = "SELECT istrazivac_id, naziv, kvalifikacije, specijalizacija FROM istrazivac";
 
-        try {
-            Connection conn = Config.getConnection();
-            PreparedStatement ps = conn.prepareStatement(sql);
-
-            ResultSet rs = ps.executeQuery();
-
+        try (Connection conn = Config.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
-
                 Researcher r = new Researcher(
                         rs.getInt("istrazivac_id"),
                         rs.getString("naziv"),
@@ -48,10 +44,8 @@ public class ResearcherDAO {
 
         String sql = "INSERT INTO istrazivac (naziv, kvalifikacije, specijalizacija) VALUES (?, ?, ?)";
 
-        try {
-            Connection conn = Config.getConnection();
-            PreparedStatement ps = conn.prepareStatement(sql);
-
+        try (Connection conn = Config.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, naziv);
             ps.setString(2, kvalifikacije);
             ps.setString(3, specijalizacija);

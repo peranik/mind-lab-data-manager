@@ -17,14 +17,10 @@ public class ParticipantDAO {
 
         String sql = "SELECT ucesnik_id, sifra, pol, starost, obrazovanje, opis FROM ucesnik";
 
-        try {
-            Connection conn = Config.getConnection();
-            PreparedStatement ps = conn.prepareStatement(sql);
-
-            ResultSet rs = ps.executeQuery();
-
+        try (Connection conn = Config.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
-
                 Participant p = new Participant(
                         rs.getInt("ucesnik_id"),
                         rs.getString("sifra"),
@@ -50,10 +46,8 @@ public class ParticipantDAO {
 
         String sql = "INSERT INTO ucesnik (sifra, pol, starost, obrazovanje, opis) VALUES (?, ?, ?, ?, ?)";
 
-        try {
-            Connection conn = Config.getConnection();
-            PreparedStatement ps = conn.prepareStatement(sql);
-
+        try (Connection conn = Config.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, sifra);
             ps.setString(2, pol);
             ps.setInt(3, starost);
@@ -71,12 +65,9 @@ public class ParticipantDAO {
 
         String sql = "DELETE FROM ucesnik WHERE ucesnik_id = ?";
 
-        try {
-            Connection conn = Config.getConnection();
-            PreparedStatement ps = conn.prepareStatement(sql);
-
+        try (Connection conn = Config.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, id);
-
             ps.executeUpdate();
 
         } catch (Exception e) {

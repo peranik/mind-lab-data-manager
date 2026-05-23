@@ -10,43 +10,22 @@ import java.util.Properties;
 public class Config {
 
     private static Properties properties;
-    private static Connection connection;
+    private static String host;
+    private static String port;
+    private static String database;
+    private static String username;
+    private static String password;
 
     public static void connect(String host, String port, String db, String user, String password) {
-        try {
-            if (connection != null && !connection.isClosed()) {
-                return;
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException("Could not verify existing DB connection", e);
-        }
-
-        String url =
-                "jdbc:mysql://" + host + ":" + port + "/" + db +
-                        "?useSSL=false&serverTimezone=UTC";
-
-        System.out.println("=== DB CONNECT START ===");
-        System.out.println("URL: " + url);
-        System.out.println("USER: " + user);
-
-        try {
-            connection = DriverManager.getConnection(url, user, password);
-            System.out.println("CONNECTED OK");
-        } catch (SQLException e) {
-            e.printStackTrace();
-            throw new RuntimeException("DB FAIL");
-        }
+        Config.host = host;
+        Config.port = port;
+        Config.database = db;
+        Config.username = user;
+        Config.password = password;
     }
 
     public static void disconnect() {
-        try {
-            if (connection != null && !connection.isClosed()) {
-                connection.close();
-            }
-            connection = null;
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        // No-op: connections are opened and closed per database operation.
     }
 
     public static void loadProperties(String cfgFile) {
@@ -63,7 +42,24 @@ public class Config {
     }
 
     public static Connection getConnection() {
-        return connection;
+        validateSettings();
+
+        try {
+            return DriverManager.getConnection(buildUrl(), username, password);
+        } catch (SQLException e) {
+            throw new RuntimeException("Could not open database connection.", e);
+        }
+    }
+
+    private static String buildUrl() {
+        return "jdbc:mysql://" + host + ":" + port + "/" + database +
+                "?useSSL=false&serverTimezone=UTC";
+    }
+
+    private static void validateSettings() {
+        if (host == null || port == null || database == null || username == null || password == null) {
+            throw new IllegalStateException("Database connection settings are not initialized.");
+        }
     }
 
     private Config() {

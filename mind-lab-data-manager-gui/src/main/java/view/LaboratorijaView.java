@@ -32,7 +32,13 @@ public class LaboratorijaView {
 
         Button btnObrisiLaboratorije=new Button("Obrisi");
         btnObrisiLaboratorije.setOnAction(e->{
-            int labId=cbxIzborLaboratorije.getSelectionModel().getSelectedItem().getId();
+            Laboratory selectedLaboratory = cbxIzborLaboratorije.getSelectionModel().getSelectedItem();
+            if (selectedLaboratory == null) {
+                System.out.println("Izaberite laboratoriju.");
+                return;
+            }
+
+            int labId=selectedLaboratory.getId();
             String sql = "{CALL delete_laboratory(?, ?)}";
 
             try (Connection conn = Config.getConnection();
@@ -44,11 +50,10 @@ public class LaboratorijaView {
                 boolean rezultat = cs.getBoolean(2);
                 if (rezultat) {
                     System.out.println("Laboratorija obrisana");
-                    cbxIzborLaboratorije.getItems().remove(cbxIzborLaboratorije.getSelectionModel().getSelectedItem());
+                    cbxIzborLaboratorije.getItems().remove(selectedLaboratory);
                 } else {
                     System.out.println("Brisanje nije dozvoljeno");
                 }
-
             } catch (Exception ex) {
                 ex.printStackTrace();
             }

@@ -20,11 +20,9 @@ public class SessionDAO {
             FROM sesija s
         """;
 
-        try {
-            Connection conn = Config.getConnection();
-            PreparedStatement ps = conn.prepareStatement(sql);
-            ResultSet rs = ps.executeQuery();
-
+        try (Connection conn = Config.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
             while(rs.next()) {
                 list.add(new Session(
                         rs.getInt("sesija_id"),
@@ -45,10 +43,8 @@ public class SessionDAO {
 
         String sql = "{CALL sp_update_session(?,?,?)}";
 
-        try {
-            Connection conn = Config.getConnection();
-            CallableStatement cs = conn.prepareCall(sql);
-
+        try (Connection conn = Config.getConnection();
+             CallableStatement cs = conn.prepareCall(sql)) {
             cs.setString(1, s.getDatum());
             cs.setString(2, s.getVreme());
             cs.setInt(3, s.getLabId());
@@ -64,10 +60,8 @@ public class SessionDAO {
 
         String sql = "DELETE FROM sesija WHERE sesija_id = ?";
 
-        try {
-            Connection conn = Config.getConnection();
-            PreparedStatement ps = conn.prepareStatement(sql);
-
+        try (Connection conn = Config.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, id);
             ps.executeUpdate();
 
