@@ -643,7 +643,24 @@ INSERT INTO laboratorija (naziv) VALUES
 ('Media psychology'),
 ('Cyberpsychology'),
 ('Human-computer interaction'),
-('User experience lab');
+('User experience lab'),
+('Delete behavior psychology'),
+('Deletable memory studies'),
+('Emotional deletion lab'),
+('Cognitive delete patterns'),
+('Psychology of forgetting'),
+('Social deletion dynamics'),
+('Digital identity deletion'),
+('Selective memory deletion'),
+('Delete anxiety research'),
+('Behavioral deletion analysis'),
+('Trauma and memory deletion'),
+('Cyberpsychology of deletion'),
+('Attachment and deletion lab'),
+('Deletable habit formation'),
+('Psychological reset studies');
+-- Povezati ove obrisive laboratorije sa nekim alatima i tako time
+
 
 -- ============================================
 -- ONLAJN_CENTAR (50 redova - deo laboratorija)
