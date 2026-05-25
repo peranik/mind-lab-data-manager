@@ -273,8 +273,47 @@ DELIMITER ;
 
 DELIMITER $$
 
--- FUNKCIJA KOJA TESTIRA FUNKCIJU ZA BRISANJE LABORATORIJE
+-- Procedura kojom se menja vreme u sesiji
 
+DROP PROCEDURE IF EXISTS izmeni_vreme_sesije;
+DELIMITER $$
+CREATE PROCEDURE izmeni_vreme_sesije(
+IN idSesije INT,
+IN novoVremePocetka VARCHAR(20),
+IN novoVremeZavrsetka VARCHAR(20),
+OUT poruka VARCHAR(100)
+)
+BEGIN
+DECLARE pocetak TIME;
+DECLARE kraj TIME;
+
+SET pocetak=STR_TO_DATE(novoVremePocetka, '%H:%i:%s');
+SET kraj=STR_TO_DATE(novoVremeZavrsetka, '%H:%i:%s');
+
+IF pocetak IS NULL OR kraj IS NULL THEN
+	SET poruka='Neispravan format vremena';
+ELSEIF pocetak >= kraj THEN
+	SET poruka='Pocetak mora biti pre kraja';
+ELSEIF EXISTS (
+	SELECT 1 FROM sesija
+    WHERE sesija_id<>idSesije
+    AND vreme_pocetka<kraj
+    AND vreme_zavrsetka>pocetak
+)THEN
+	SET poruka='Termin je zauzet';
+ELSE
+    UPDATE SESIJA SET vreme_pocetka=pocetak,
+    vreme_zavrsetka=kraj
+    WHERE sesija_id=idSesije;
+
+    SET poruka='Uspesno izmenjeno';
+END IF;
+
+END$$
+DELIMITER ;
+
+-- FUNKCIJA KOJA TESTIRA FUNKCIJU ZA BRISANJE LABORATORIJE
+DELIMITER $$
 CREATE FUNCTION fn_test_lab_can_delete()
 RETURNS BOOLEAN
 DETERMINISTIC

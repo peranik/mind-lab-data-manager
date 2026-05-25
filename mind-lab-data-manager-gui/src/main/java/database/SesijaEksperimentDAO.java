@@ -20,6 +20,7 @@ public class SesijaEksperimentDAO {
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
                 list.add(new SesijaEksperiment(
+                        rs.getInt("sesija_id"),
                         rs.getDate("datum"),
                         rs.getTime("vreme_pocetka"),
                         rs.getTime("vreme_zavrsetka"),

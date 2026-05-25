@@ -4,7 +4,7 @@ import java.sql.Time;
 import java.sql.Date;
 
 public class SesijaEksperiment {
-
+    public int sesijaId;
     public Date datum;
     public Time vremePocetka;
     public Time vremeZavrsetka;
@@ -13,13 +13,14 @@ public class SesijaEksperiment {
     public String nazivAnkete;
     public String nazivLaboratorije;
 
-    public SesijaEksperiment(Date datum,
+    public SesijaEksperiment(int sesijaId,
+                             Date datum,
                              Time vremePocetka,
                              Time vremeZavrsetka,
                              String statusIzvodjenja,
                              String nazivAnkete,
                              String nazivLaboratorije) {
-
+        this.sesijaId = sesijaId;
         this.datum = datum;
         this.vremePocetka = vremePocetka;
         this.vremeZavrsetka = vremeZavrsetka;
@@ -27,6 +28,9 @@ public class SesijaEksperiment {
         this.nazivAnkete = nazivAnkete;
         this.nazivLaboratorije = nazivLaboratorije;
 
+    }
+    public int getSesijaId() {
+        return sesijaId;
     }
     public Date getDatum() {
         return datum;
