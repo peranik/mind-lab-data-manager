@@ -211,6 +211,7 @@ DROP VIEW IF EXISTS pregled_sesija_eksperimenata;
 
 CREATE VIEW pregled_sesija_eksperimenata AS
 SELECT
+    sesija.sesija_id,
     izvodjenje.datum,
     sesija.vreme_pocetka,
     sesija.vreme_zavrsetka,
@@ -286,9 +287,14 @@ OUT poruka VARCHAR(100)
 BEGIN
 DECLARE pocetak TIME;
 DECLARE kraj TIME;
+DECLARE labSesije INT;
 
 SET pocetak=STR_TO_DATE(novoVremePocetka, '%H:%i:%s');
 SET kraj=STR_TO_DATE(novoVremeZavrsetka, '%H:%i:%s');
+
+SELECT izvodjenje.lab_id INTO labSesije FROM sesija
+join izvodjenje on sesija.izvodjenje_id=izvodjenje.izvodjenje_id
+WHERE sesija.sesija_id=idSesije;
 
 IF pocetak IS NULL OR kraj IS NULL THEN
 	SET poruka='Neispravan format vremena';
@@ -296,9 +302,11 @@ ELSEIF pocetak >= kraj THEN
 	SET poruka='Pocetak mora biti pre kraja';
 ELSEIF EXISTS (
 	SELECT 1 FROM sesija
-    WHERE sesija_id<>idSesije
-    AND vreme_pocetka<kraj
-    AND vreme_zavrsetka>pocetak
+	JOIN izvodjenje ON sesija.izvodjenje_id=izvodjenje.izvodjenje_id
+	WHERE sesija.sesija_id<>idSesije
+	AND izvodjenje.lab_id=labSesije
+	AND sesija.vreme_pocetka<kraj
+	AND sesija.vreme_zavrsetka>pocetak
 )THEN
 	SET poruka='Termin je zauzet';
 ELSE
