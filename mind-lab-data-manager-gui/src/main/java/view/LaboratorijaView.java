@@ -4,6 +4,7 @@ import app.Config;
 import database.LaboratorijaDAO;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
@@ -30,11 +31,15 @@ public class LaboratorijaView {
             cbxIzborLaboratorije.getItems().add(listaLaboratorija.get(i));
         }
 
-        Button btnObrisiLaboratorije=new Button("Obrisi");
+        Button btnObrisiLaboratorije=new Button("Obriši");
         btnObrisiLaboratorije.setOnAction(e->{
             Laboratory selectedLaboratory = cbxIzborLaboratorije.getSelectionModel().getSelectedItem();
             if (selectedLaboratory == null) {
-                System.out.println("Izaberite laboratoriju.");
+                Alert alert = new Alert(Alert.AlertType.WARNING);
+                alert.setTitle("Upozorenje");
+                alert.setHeaderText(null);
+                alert.setContentText("Izaberite laboratoriju.");
+                alert.showAndWait();
                 return;
             }
 
@@ -47,12 +52,20 @@ public class LaboratorijaView {
                 cs.registerOutParameter(2, java.sql.Types.BOOLEAN);
                 cs.execute();
 
-                boolean rezultat = cs.getBoolean(2);
-                if (rezultat) {
-                    System.out.println("Laboratorija obrisana");
+                boolean rezultat = cs.getBoolean(2);if (rezultat) {
+                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                    alert.setTitle("Uspeh");
+                    alert.setHeaderText(null);
+                    alert.setContentText("Laboratorija je uspešno obrisana.");
+                    alert.showAndWait();
+
                     cbxIzborLaboratorije.getItems().remove(selectedLaboratory);
                 } else {
-                    System.out.println("Brisanje nije dozvoljeno");
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("Greška");
+                    alert.setHeaderText(null);
+                    alert.setContentText("Brisanje nije dozvoljeno.");
+                    alert.showAndWait();
                 }
             } catch (Exception ex) {
                 ex.printStackTrace();
@@ -63,6 +76,7 @@ public class LaboratorijaView {
         hb.setSpacing(20);
         hb.setAlignment(Pos.CENTER);
         VBox root = new VBox(hb,btnObrisiLaboratorije);
+        root.setSpacing(20);
         root.setAlignment(Pos.CENTER);
         Scene scene = new Scene(root, 450, 250);
         stage.setTitle("Pregled Laboratorija");
