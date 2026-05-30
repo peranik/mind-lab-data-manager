@@ -18,6 +18,12 @@ import java.sql.Time;
 
 public class SesijaEksperimentView {
 
+    private void refreshTable(TableView<SesijaEksperiment> table) {
+        table.setItems(FXCollections.observableArrayList(
+                SesijaEksperimentDAO.getAll()
+        ));
+    }
+
     public void show() {
 
         Stage stage = new Stage();
@@ -63,9 +69,7 @@ public class SesijaEksperimentView {
                 colDatum,colPocetak,colKraj,colStatus,colAnketa,colLab,colBrojAlata,colBrojUcesnika
         );
 
-        table.setItems(FXCollections.observableArrayList(
-                SesijaEksperimentDAO.getAll()
-        ));
+        refreshTable(table);
 
         Button btnPromeniVreme = new Button("Promeni vreme");
         PromeniVremeView promeniVreme=new PromeniVremeView();
@@ -75,6 +79,18 @@ public class SesijaEksperimentView {
                        ,table.getSelectionModel().getSelectedItem().getVremePocetka()
                        ,table.getSelectionModel().getSelectedItem().getVremeZavrsetka());
         });
+        Button btnPromeniStatus = new Button("Promeni status");
+        PromeniStatusIzvodjenjaView promeniStatusIzvodjenjaView = new PromeniStatusIzvodjenjaView();
+        btnPromeniStatus.setOnAction(e -> {
+            if (table.getSelectionModel().getSelectedItem() != null) {
+                promeniStatusIzvodjenjaView.show(
+                        table.getSelectionModel().getSelectedItem().getSesijaId(),
+                        table.getSelectionModel().getSelectedItem().getStatusIzvodjenja()
+                );
+            }
+        });
+        Button btnOsvezi = new Button("Osveži");
+        btnOsvezi.setOnAction(e -> refreshTable(table));
         Button btnDodajAlat = new Button("Dodaj alat");
         DodajAlatSesijaView dodajAlatSesijaView = new DodajAlatSesijaView();
         btnDodajAlat.setOnAction(e -> {
@@ -111,7 +127,7 @@ public class SesijaEksperimentView {
                 );
             }
         });
-        HBox dugmici=new HBox(btnPromeniVreme, btnDodajAlat, btnUkloniAlat, btnDodajUcesnika, btnUkloniUcesnika);
+        HBox dugmici=new HBox(btnPromeniVreme, btnPromeniStatus, btnDodajAlat, btnUkloniAlat, btnDodajUcesnika, btnUkloniUcesnika, btnOsvezi);
         dugmici.setSpacing(10);
         VBox root = new VBox(table,dugmici);
         root.setSpacing(20);

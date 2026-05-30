@@ -427,6 +427,35 @@ END IF;
 END$$
 DELIMITER ;
 
+-- Procedura kojom se menja status izvodjenja vezanog za sesiju
+
+DROP PROCEDURE IF EXISTS izmeni_status_izvodjenja;
+DELIMITER $$
+CREATE PROCEDURE izmeni_status_izvodjenja(
+IN idSesije INT,
+IN noviStatus VARCHAR(20),
+OUT poruka VARCHAR(100)
+)
+BEGIN
+IF noviStatus IS NULL OR TRIM(noviStatus) = '' THEN
+    SET poruka='Status ne sme biti prazan';
+ELSEIF NOT EXISTS (
+    SELECT 1
+    FROM sesija
+    WHERE sesija.sesija_id = idSesije
+) THEN
+    SET poruka='Sesija ne postoji';
+ELSE
+    UPDATE izvodjenje
+    JOIN sesija ON sesija.izvodjenje_id = izvodjenje.izvodjenje_id
+    SET izvodjenje.status = TRIM(noviStatus)
+    WHERE sesija.sesija_id = idSesije;
+
+    SET poruka='Uspesno izmenjeno';
+END IF;
+END$$
+DELIMITER ;
+
 -- Procedura kojom se dodaje alat u sesiju
 
 DROP PROCEDURE IF EXISTS dodaj_alat_u_sesiju;
