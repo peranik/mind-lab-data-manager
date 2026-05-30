@@ -36,4 +36,31 @@ public class AlatDAO {
 
         return list;
     }
+
+    public static List<Alat> getDostupniAlatiZaSesiju(int sesijaId) {
+        List<Alat> list = new ArrayList<>();
+        String sql = """
+                SELECT alat_id, naziv
+                FROM pregled_dostupnih_alata_za_sesiju
+                WHERE sesija_id = ?
+                ORDER BY naziv ASC, alat_id ASC
+                """;
+
+        try (Connection conn = Config.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, sesijaId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    list.add(new Alat(
+                            rs.getInt("alat_id"),
+                            rs.getString("naziv") + " (ID: " + rs.getInt("alat_id") + ")"
+                    ));
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return list;
+    }
 }

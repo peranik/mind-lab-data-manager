@@ -12,6 +12,8 @@ public class SesijaEksperiment {
     public String statusIzvodjenja;
     public String nazivAnkete;
     public String nazivLaboratorije;
+    public int brojAlata;
+    public int brojUcesnika;
 
     public SesijaEksperiment(int sesijaId,
                              Date datum,
@@ -19,7 +21,9 @@ public class SesijaEksperiment {
                              Time vremeZavrsetka,
                              String statusIzvodjenja,
                              String nazivAnkete,
-                             String nazivLaboratorije) {
+                             String nazivLaboratorije,
+                             int brojAlata,
+                             int brojUcesnika) {
         this.sesijaId = sesijaId;
         this.datum = datum;
         this.vremePocetka = vremePocetka;
@@ -27,6 +31,8 @@ public class SesijaEksperiment {
         this.statusIzvodjenja = statusIzvodjenja;
         this.nazivAnkete = nazivAnkete;
         this.nazivLaboratorije = nazivLaboratorije;
+        this.brojAlata = brojAlata;
+        this.brojUcesnika = brojUcesnika;
 
     }
     public int getSesijaId() {
@@ -54,5 +60,13 @@ public class SesijaEksperiment {
 
     public String getNazivLaboratorije() {
         return nazivLaboratorije;
+    }
+
+    public int getBrojAlata() {
+        return brojAlata;
+    }
+
+    public int getBrojUcesnika() {
+        return brojUcesnika;
     }
 }

@@ -26,7 +26,9 @@ public class SesijaEksperimentDAO {
                         rs.getTime("vreme_zavrsetka"),
                         rs.getString("status_izvodjenja"),
                         rs.getString("naziv_ankete"),
-                        rs.getString("naziv_laboratorije")
+                        rs.getString("naziv_laboratorije"),
+                        rs.getInt("broj_alata"),
+                        rs.getInt("broj_ucesnika")
                 ));
             }
 

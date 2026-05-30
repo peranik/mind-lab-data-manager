@@ -217,7 +217,9 @@ SELECT
     sesija.vreme_zavrsetka,
     izvodjenje.status AS status_izvodjenja,
     anketa.naziv AS naziv_ankete,
-    laboratorija.naziv AS naziv_laboratorije
+    laboratorija.naziv AS naziv_laboratorije,
+    COUNT(DISTINCT alat_sesija.alat_id) AS broj_alata,
+    COUNT(DISTINCT sesija_ucesnik.ucesnik_id) AS broj_ucesnika
 FROM sesija
 JOIN izvodjenje
     ON sesija.izvodjenje_id = izvodjenje.izvodjenje_id
@@ -225,6 +227,19 @@ JOIN anketa
     ON izvodjenje.anketa_id = anketa.anketa_id
 JOIN laboratorija
     ON izvodjenje.lab_id = laboratorija.lab_id
+LEFT JOIN alat_sesija
+    ON sesija.sesija_id = alat_sesija.sesija_id
+LEFT JOIN sesija_ucesnik
+    ON sesija.sesija_id = sesija_ucesnik.sesija_id
+GROUP BY
+    sesija.sesija_id,
+    izvodjenje.datum,
+    sesija.vreme_pocetka,
+    sesija.vreme_zavrsetka,
+    izvodjenje.status,
+    anketa.naziv,
+    laboratorija.naziv
+HAVING COUNT(DISTINCT sesija.sesija_id) > 0
 ORDER BY
     izvodjenje.datum ASC,
     sesija.sesija_id ASC,
@@ -249,6 +264,31 @@ JOIN tip_alata
     ON alat.tip_alata_id = tip_alata.tip_alata_id;
 -- SELECT * FROM pregled_alata_sesije;
 
+-- View se dodaje da bi se mogao pogledati spisak dostupnih alata za dodelu sesiji
+-- Veoma je bitno da alat bude iz iste laboratorije i da vec nije dodat toj sesiji
+
+DROP VIEW IF EXISTS pregled_dostupnih_alata_za_sesiju;
+
+CREATE VIEW pregled_dostupnih_alata_za_sesiju AS
+SELECT
+    sesija.sesija_id,
+    alat.alat_id,
+    tip_alata.naziv
+FROM sesija
+JOIN izvodjenje
+    ON sesija.izvodjenje_id = izvodjenje.izvodjenje_id
+JOIN alat
+    ON izvodjenje.lab_id = alat.lab_id
+JOIN tip_alata
+    ON alat.tip_alata_id = tip_alata.tip_alata_id
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM alat_sesija
+    WHERE alat_sesija.sesija_id = sesija.sesija_id
+    AND alat_sesija.alat_id = alat.alat_id
+);
+-- SELECT * FROM pregled_dostupnih_alata_za_sesiju;
+
 -- View se dodaje da bi se mogao pogledati spisak ucesnika povezanih sa sesijom
 -- Veoma je bitno da mogu da se prikazu ucesnici za izbor pri uklanjanju iz sesije
 
@@ -267,6 +307,35 @@ FROM sesija_ucesnik
 JOIN ucesnik
     ON sesija_ucesnik.ucesnik_id = ucesnik.ucesnik_id;
 -- SELECT * FROM pregled_ucesnika_sesije;
+
+-- View se dodaje da bi se mogao pogledati spisak dostupnih ucesnika za dodelu sesiji
+-- Veoma je bitno da ucesnik bude iz iste laboratorije i da vec nije dodat toj sesiji
+
+DROP VIEW IF EXISTS pregled_dostupnih_ucesnika_za_sesiju;
+
+CREATE VIEW pregled_dostupnih_ucesnika_za_sesiju AS
+SELECT
+    sesija.sesija_id,
+    ucesnik.ucesnik_id,
+    ucesnik.sifra,
+    ucesnik.pol,
+    ucesnik.starost,
+    ucesnik.obrazovanje,
+    ucesnik.opis
+FROM sesija
+JOIN izvodjenje
+    ON sesija.izvodjenje_id = izvodjenje.izvodjenje_id
+JOIN ucesce
+    ON izvodjenje.lab_id = ucesce.lab_id
+JOIN ucesnik
+    ON ucesce.ucesnik_id = ucesnik.ucesnik_id
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM sesija_ucesnik
+    WHERE sesija_ucesnik.sesija_id = sesija.sesija_id
+    AND sesija_ucesnik.ucesnik_id = ucesnik.ucesnik_id
+);
+-- SELECT * FROM pregled_dostupnih_ucesnika_za_sesiju;
 
 
 
@@ -327,32 +396,17 @@ DECLARE labSesije INT;
 
 SET pocetak=STR_TO_DATE(novoVremePocetka, '%H:%i:%s');
 SET kraj=STR_TO_DATE(novoVremeZavrsetka, '%H:%i:%s');
-<<<<<<< HEAD
-
-SELECT izvodjenje.lab_id INTO labSesije FROM sesija
-join izvodjenje on sesija.izvodjenje_id=izvodjenje.izvodjenje_id
-WHERE sesija.sesija_id=idSesije;
-=======
 SELECT izvodjenje.lab_id
 INTO labSesije
 FROM sesija
 JOIN izvodjenje ON sesija.izvodjenje_id = izvodjenje.izvodjenje_id
 WHERE sesija.sesija_id = idSesije;
->>>>>>> f680972 (Dodao brisanja)
 
 IF pocetak IS NULL OR kraj IS NULL THEN
 	SET poruka='Neispravan format vremena';
 ELSEIF pocetak >= kraj THEN
 	SET poruka='Pocetak mora biti pre kraja';
 ELSEIF EXISTS (
-<<<<<<< HEAD
-	SELECT 1 FROM sesija
-	JOIN izvodjenje ON sesija.izvodjenje_id=izvodjenje.izvodjenje_id
-	WHERE sesija.sesija_id<>idSesije
-	AND izvodjenje.lab_id=labSesije
-	AND sesija.vreme_pocetka<kraj
-	AND sesija.vreme_zavrsetka>pocetak
-=======
 	SELECT 1
     FROM sesija
     JOIN izvodjenje ON sesija.izvodjenje_id = izvodjenje.izvodjenje_id
@@ -360,7 +414,6 @@ ELSEIF EXISTS (
     AND izvodjenje.lab_id = labSesije
     AND sesija.vreme_pocetka<kraj
     AND sesija.vreme_zavrsetka>pocetak
->>>>>>> f680972 (Dodao brisanja)
 )THEN
 	SET poruka='Termin je zauzet';
 ELSE
@@ -371,6 +424,66 @@ ELSE
     SET poruka='Uspesno izmenjeno';
 END IF;
 
+END$$
+DELIMITER ;
+
+-- Procedura kojom se dodaje alat u sesiju
+
+DROP PROCEDURE IF EXISTS dodaj_alat_u_sesiju;
+DELIMITER $$
+CREATE PROCEDURE dodaj_alat_u_sesiju(
+IN idSesije INT,
+IN idAlata INT,
+OUT poruka VARCHAR(100)
+)
+BEGIN
+DECLARE labSesije INT;
+DECLARE labAlata INT;
+DECLARE vecPostojiVeza INT DEFAULT 0;
+
+DECLARE EXIT HANDLER FOR SQLEXCEPTION
+BEGIN
+    ROLLBACK;
+    SET poruka = 'Greska pri dodavanju alata';
+END;
+
+SELECT izvodjenje.lab_id
+INTO labSesije
+FROM sesija
+JOIN izvodjenje ON sesija.izvodjenje_id = izvodjenje.izvodjenje_id
+WHERE sesija.sesija_id = idSesije;
+
+SELECT alat.lab_id
+INTO labAlata
+FROM alat
+WHERE alat.alat_id = idAlata;
+
+SELECT COUNT(*)
+INTO vecPostojiVeza
+FROM alat_sesija
+WHERE sesija_id = idSesije AND alat_id = idAlata;
+
+IF labSesije IS NULL THEN
+    SET poruka = 'Sesija ne postoji';
+ELSEIF labAlata IS NULL THEN
+    SET poruka = 'Alat ne postoji ili nije dodeljen laboratoriji';
+ELSEIF labSesije <> labAlata THEN
+    SET poruka = 'Alat nije iz iste laboratorije kao sesija';
+ELSEIF vecPostojiVeza > 0 THEN
+    SET poruka = 'Alat je vec dodat toj sesiji';
+ELSE
+    START TRANSACTION;
+
+    INSERT INTO alat_sesija (sesija_id, alat_id)
+    VALUES (idSesije, idAlata);
+
+    UPDATE alat_sesija
+    SET alat_id = idAlata
+    WHERE sesija_id = idSesije AND alat_id = idAlata;
+
+    COMMIT;
+    SET poruka = 'Uspesno dodat alat';
+END IF;
 END$$
 DELIMITER ;
 
@@ -395,6 +508,48 @@ ELSE
     WHERE sesija_id = idSesije AND alat_id = idAlata;
 
     SET poruka = 'Uspesno uklonjen alat';
+END IF;
+END$$
+DELIMITER ;
+
+-- Procedura kojom se dodaje ucesnik u sesiju
+
+DROP PROCEDURE IF EXISTS dodaj_ucesnika_u_sesiju;
+DELIMITER $$
+CREATE PROCEDURE dodaj_ucesnika_u_sesiju(
+IN idSesije INT,
+IN idUcesnika INT,
+OUT poruka VARCHAR(100)
+)
+BEGIN
+DECLARE labSesije INT;
+
+SELECT izvodjenje.lab_id
+INTO labSesije
+FROM sesija
+JOIN izvodjenje ON sesija.izvodjenje_id = izvodjenje.izvodjenje_id
+WHERE sesija.sesija_id = idSesije;
+
+IF labSesije IS NULL THEN
+    SET poruka = 'Sesija ne postoji';
+ELSEIF NOT EXISTS (
+    SELECT 1
+    FROM ucesce
+    WHERE ucesce.ucesnik_id = idUcesnika
+    AND ucesce.lab_id = labSesije
+) THEN
+    SET poruka = 'Ucesnik nije iz iste laboratorije kao sesija';
+ELSEIF EXISTS (
+    SELECT 1
+    FROM sesija_ucesnik
+    WHERE sesija_id = idSesije AND ucesnik_id = idUcesnika
+) THEN
+    SET poruka = 'Ucesnik je vec dodat toj sesiji';
+ELSE
+    INSERT INTO sesija_ucesnik (sesija_id, ucesnik_id)
+    VALUES (idSesije, idUcesnika);
+
+    SET poruka = 'Uspesno dodat ucesnik';
 END IF;
 END$$
 DELIMITER ;

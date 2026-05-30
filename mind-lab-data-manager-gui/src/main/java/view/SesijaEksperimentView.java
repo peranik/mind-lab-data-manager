@@ -50,9 +50,17 @@ public class SesijaEksperimentView {
                 new TableColumn<>("Laboratorija");
         colLab.setCellValueFactory(new PropertyValueFactory<>("nazivLaboratorije"));
 
+        TableColumn<SesijaEksperiment, Integer> colBrojAlata =
+                new TableColumn<>("Broj alata");
+        colBrojAlata.setCellValueFactory(new PropertyValueFactory<>("brojAlata"));
+
+        TableColumn<SesijaEksperiment, Integer> colBrojUcesnika =
+                new TableColumn<>("Broj učesnika");
+        colBrojUcesnika.setCellValueFactory(new PropertyValueFactory<>("brojUcesnika"));
+
         // ===== TABLE =====
         table.getColumns().addAll(
-                colDatum,colPocetak,colKraj,colStatus,colAnketa,colLab
+                colDatum,colPocetak,colKraj,colStatus,colAnketa,colLab,colBrojAlata,colBrojUcesnika
         );
 
         table.setItems(FXCollections.observableArrayList(
@@ -67,11 +75,29 @@ public class SesijaEksperimentView {
                        ,table.getSelectionModel().getSelectedItem().getVremePocetka()
                        ,table.getSelectionModel().getSelectedItem().getVremeZavrsetka());
         });
+        Button btnDodajAlat = new Button("Dodaj alat");
+        DodajAlatSesijaView dodajAlatSesijaView = new DodajAlatSesijaView();
+        btnDodajAlat.setOnAction(e -> {
+            if (table.getSelectionModel().getSelectedItem() != null) {
+                dodajAlatSesijaView.show(
+                        table.getSelectionModel().getSelectedItem().getSesijaId()
+                );
+            }
+        });
         Button btnUkloniAlat = new Button("Ukloni alat");
         UkloniAlatSesijaView ukloniAlatSesijaView = new UkloniAlatSesijaView();
         btnUkloniAlat.setOnAction(e -> {
             if (table.getSelectionModel().getSelectedItem() != null) {
                 ukloniAlatSesijaView.show(
+                        table.getSelectionModel().getSelectedItem().getSesijaId()
+                );
+            }
+        });
+        Button btnDodajUcesnika = new Button("Dodaj učesnika");
+        DodajUcesnikaSesijaView dodajUcesnikaSesijaView = new DodajUcesnikaSesijaView();
+        btnDodajUcesnika.setOnAction(e -> {
+            if (table.getSelectionModel().getSelectedItem() != null) {
+                dodajUcesnikaSesijaView.show(
                         table.getSelectionModel().getSelectedItem().getSesijaId()
                 );
             }
@@ -85,7 +111,7 @@ public class SesijaEksperimentView {
                 );
             }
         });
-        HBox dugmici=new HBox(btnPromeniVreme, btnUkloniAlat, btnUkloniUcesnika);
+        HBox dugmici=new HBox(btnPromeniVreme, btnDodajAlat, btnUkloniAlat, btnDodajUcesnika, btnUkloniUcesnika);
         dugmici.setSpacing(10);
         VBox root = new VBox(table,dugmici);
         root.setSpacing(20);
