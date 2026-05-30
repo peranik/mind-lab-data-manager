@@ -30,7 +30,7 @@ public class PromeniVremeView {
             String sql = "{CALL izmeni_vreme_sesije(?, ?, ?, ?)}";
 
             try (Connection conn = Config.getConnection();
-                 CallableStatement cs = conn.prepareCall(sql)) {
+                    CallableStatement cs = conn.prepareCall(sql)) {
                 cs.setInt(1, idSesije);
                 cs.setString(2, vremePocetkaText.getText().trim());
                 cs.setString(3, vremeZavrsetkaText.getText().trim());
@@ -56,7 +56,8 @@ public class PromeniVremeView {
             }
         });
         VBox vbox = new VBox();
-        vbox.getChildren().addAll(vremePocetkaLabel, vremePocetkaText, vremeZavrsetkaLabel, vremeZavrsetkaText, btnPromeniVreme);
+        vbox.getChildren().addAll(vremePocetkaLabel, vremePocetkaText, vremeZavrsetkaLabel, vremeZavrsetkaText,
+                btnPromeniVreme);
         vbox.setSpacing(10);
         root.setAlignment(Pos.CENTER);
         root.setSpacing(20);
