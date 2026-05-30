@@ -40,6 +40,42 @@ public class ParticipantDAO {
         return list;
     }
 
+    public static List<Participant> getUcesniciZaSesiju(int sesijaId) {
+
+        List<Participant> list = new ArrayList<>();
+
+        String sql = """
+                SELECT ucesnik_id, sifra, pol, starost, obrazovanje, opis
+                FROM pregled_ucesnika_sesije
+                WHERE sesija_id = ?
+                ORDER BY sifra ASC, ucesnik_id ASC
+                """;
+
+        try (Connection conn = Config.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, sesijaId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Participant p = new Participant(
+                            rs.getInt("ucesnik_id"),
+                            rs.getString("sifra"),
+                            rs.getString("pol"),
+                            rs.getInt("starost"),
+                            rs.getString("obrazovanje"),
+                            rs.getString("opis")
+                    );
+
+                    list.add(p);
+                }
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return list;
+    }
+
     // OPCIONALNO (CRUD kasnije)
 
     public static void insert(String sifra, String pol, int starost, String obrazovanje, String opis) {

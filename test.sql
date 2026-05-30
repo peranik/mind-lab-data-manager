@@ -232,6 +232,42 @@ ORDER BY
     sesija.vreme_zavrsetka DESC;
 -- SELECT * FROM pregled_sesija_eksperimenata;
 
+-- View se dodaje da bi se mogao pogledati spisak alata povezanih sa sesijom
+-- Veoma je bitno da mogu da se prikazu alati za izbor pri uklanjanju iz sesije
+
+DROP VIEW IF EXISTS pregled_alata_sesije;
+
+CREATE VIEW pregled_alata_sesije AS
+SELECT
+    alat_sesija.sesija_id,
+    alat.alat_id,
+    tip_alata.naziv
+FROM alat_sesija
+JOIN alat
+    ON alat_sesija.alat_id = alat.alat_id
+JOIN tip_alata
+    ON alat.tip_alata_id = tip_alata.tip_alata_id;
+-- SELECT * FROM pregled_alata_sesije;
+
+-- View se dodaje da bi se mogao pogledati spisak ucesnika povezanih sa sesijom
+-- Veoma je bitno da mogu da se prikazu ucesnici za izbor pri uklanjanju iz sesije
+
+DROP VIEW IF EXISTS pregled_ucesnika_sesije;
+
+CREATE VIEW pregled_ucesnika_sesije AS
+SELECT
+    sesija_ucesnik.sesija_id,
+    ucesnik.ucesnik_id,
+    ucesnik.sifra,
+    ucesnik.pol,
+    ucesnik.starost,
+    ucesnik.obrazovanje,
+    ucesnik.opis
+FROM sesija_ucesnik
+JOIN ucesnik
+    ON sesija_ucesnik.ucesnik_id = ucesnik.ucesnik_id;
+-- SELECT * FROM pregled_ucesnika_sesije;
+
 
 
 -- FUNKCIJA KOJA PROVERAVA DA LI LABORATORIJA MOZE BITI OBRISANA
@@ -291,22 +327,40 @@ DECLARE labSesije INT;
 
 SET pocetak=STR_TO_DATE(novoVremePocetka, '%H:%i:%s');
 SET kraj=STR_TO_DATE(novoVremeZavrsetka, '%H:%i:%s');
+<<<<<<< HEAD
 
 SELECT izvodjenje.lab_id INTO labSesije FROM sesija
 join izvodjenje on sesija.izvodjenje_id=izvodjenje.izvodjenje_id
 WHERE sesija.sesija_id=idSesije;
+=======
+SELECT izvodjenje.lab_id
+INTO labSesije
+FROM sesija
+JOIN izvodjenje ON sesija.izvodjenje_id = izvodjenje.izvodjenje_id
+WHERE sesija.sesija_id = idSesije;
+>>>>>>> f680972 (Dodao brisanja)
 
 IF pocetak IS NULL OR kraj IS NULL THEN
 	SET poruka='Neispravan format vremena';
 ELSEIF pocetak >= kraj THEN
 	SET poruka='Pocetak mora biti pre kraja';
 ELSEIF EXISTS (
+<<<<<<< HEAD
 	SELECT 1 FROM sesija
 	JOIN izvodjenje ON sesija.izvodjenje_id=izvodjenje.izvodjenje_id
 	WHERE sesija.sesija_id<>idSesije
 	AND izvodjenje.lab_id=labSesije
 	AND sesija.vreme_pocetka<kraj
 	AND sesija.vreme_zavrsetka>pocetak
+=======
+	SELECT 1
+    FROM sesija
+    JOIN izvodjenje ON sesija.izvodjenje_id = izvodjenje.izvodjenje_id
+    WHERE sesija.sesija_id<>idSesije
+    AND izvodjenje.lab_id = labSesije
+    AND sesija.vreme_pocetka<kraj
+    AND sesija.vreme_zavrsetka>pocetak
+>>>>>>> f680972 (Dodao brisanja)
 )THEN
 	SET poruka='Termin je zauzet';
 ELSE
@@ -317,6 +371,56 @@ ELSE
     SET poruka='Uspesno izmenjeno';
 END IF;
 
+END$$
+DELIMITER ;
+
+-- Procedura kojom se uklanja alat iz sesije
+
+DROP PROCEDURE IF EXISTS ukloni_alat_iz_sesije;
+DELIMITER $$
+CREATE PROCEDURE ukloni_alat_iz_sesije(
+IN idSesije INT,
+IN idAlata INT,
+OUT poruka VARCHAR(100)
+)
+BEGIN
+IF NOT EXISTS (
+    SELECT 1
+    FROM alat_sesija
+    WHERE sesija_id = idSesije AND alat_id = idAlata
+) THEN
+    SET poruka = 'Veza sesije i alata ne postoji';
+ELSE
+    DELETE FROM alat_sesija
+    WHERE sesija_id = idSesije AND alat_id = idAlata;
+
+    SET poruka = 'Uspesno uklonjen alat';
+END IF;
+END$$
+DELIMITER ;
+
+-- Procedura kojom se uklanja ucesnik iz sesije
+
+DROP PROCEDURE IF EXISTS ukloni_ucesnika_iz_sesije;
+DELIMITER $$
+CREATE PROCEDURE ukloni_ucesnika_iz_sesije(
+IN idSesije INT,
+IN idUcesnika INT,
+OUT poruka VARCHAR(100)
+)
+BEGIN
+IF NOT EXISTS (
+    SELECT 1
+    FROM sesija_ucesnik
+    WHERE sesija_id = idSesije AND ucesnik_id = idUcesnika
+) THEN
+    SET poruka = 'Veza sesije i ucesnika ne postoji';
+ELSE
+    DELETE FROM sesija_ucesnik
+    WHERE sesija_id = idSesije AND ucesnik_id = idUcesnika;
+
+    SET poruka = 'Uspesno uklonjen ucesnik';
+END IF;
 END$$
 DELIMITER ;
 

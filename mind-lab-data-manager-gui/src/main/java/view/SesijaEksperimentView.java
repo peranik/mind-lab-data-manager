@@ -67,7 +67,25 @@ public class SesijaEksperimentView {
                        ,table.getSelectionModel().getSelectedItem().getVremePocetka()
                        ,table.getSelectionModel().getSelectedItem().getVremeZavrsetka());
         });
-        HBox dugmici=new HBox(btnPromeniVreme);
+        Button btnUkloniAlat = new Button("Ukloni alat");
+        UkloniAlatSesijaView ukloniAlatSesijaView = new UkloniAlatSesijaView();
+        btnUkloniAlat.setOnAction(e -> {
+            if (table.getSelectionModel().getSelectedItem() != null) {
+                ukloniAlatSesijaView.show(
+                        table.getSelectionModel().getSelectedItem().getSesijaId()
+                );
+            }
+        });
+        Button btnUkloniUcesnika = new Button("Ukloni učesnika");
+        UkloniUcesnikaSesijaView ukloniUcesnikaSesijaView = new UkloniUcesnikaSesijaView();
+        btnUkloniUcesnika.setOnAction(e -> {
+            if (table.getSelectionModel().getSelectedItem() != null) {
+                ukloniUcesnikaSesijaView.show(
+                        table.getSelectionModel().getSelectedItem().getSesijaId()
+                );
+            }
+        });
+        HBox dugmici=new HBox(btnPromeniVreme, btnUkloniAlat, btnUkloniUcesnika);
         dugmici.setSpacing(10);
         VBox root = new VBox(table,dugmici);
         root.setSpacing(20);

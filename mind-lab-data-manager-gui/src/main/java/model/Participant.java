@@ -41,4 +41,9 @@ public class Participant {
     public String getOpis() {
         return opis;
     }
+
+    @Override
+    public String toString() {
+        return sifra + " (ID: " + id + ")";
+    }
 }
