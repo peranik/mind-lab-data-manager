@@ -38,22 +38,5 @@ public class ResearcherDAO {
         return list;
     }
 
-    // OPCIONALNO (CRUD kasnije)
 
-    public static void insert(String naziv, String kvalifikacije, String specijalizacija) {
-
-        String sql = "INSERT INTO istrazivac (naziv, kvalifikacije, specijalizacija) VALUES (?, ?, ?)";
-
-        try (Connection conn = Config.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, naziv);
-            ps.setString(2, kvalifikacije);
-            ps.setString(3, specijalizacija);
-
-            ps.executeUpdate();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
 }

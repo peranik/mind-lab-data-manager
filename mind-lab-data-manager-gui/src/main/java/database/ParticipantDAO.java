@@ -111,39 +111,4 @@ public class ParticipantDAO {
 
         return list;
     }
-
-    // OPCIONALNO (CRUD kasnije)
-
-    public static void insert(String sifra, String pol, int starost, String obrazovanje, String opis) {
-
-        String sql = "INSERT INTO ucesnik (sifra, pol, starost, obrazovanje, opis) VALUES (?, ?, ?, ?, ?)";
-
-        try (Connection conn = Config.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, sifra);
-            ps.setString(2, pol);
-            ps.setInt(3, starost);
-            ps.setString(4, obrazovanje);
-            ps.setString(5, opis);
-
-            ps.executeUpdate();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static void delete(int id) {
-
-        String sql = "DELETE FROM ucesnik WHERE ucesnik_id = ?";
-
-        try (Connection conn = Config.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1, id);
-            ps.executeUpdate();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
 }

@@ -37,35 +37,5 @@ public class ExperimentDAO {
         return list;
     }
 
-    // OPCIONALNO (kasnije za CRUD)
 
-    public static void insert(String naziv, int tipId) {
-
-        String sql = "INSERT INTO anketa (naziv, tip_id) VALUES (?, ?)";
-
-        try (Connection conn = Config.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, naziv);
-            ps.setInt(2, tipId);
-
-            ps.executeUpdate();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static void delete(int id) {
-
-        String sql = "DELETE FROM anketa WHERE anketa_id = ?";
-
-        try (Connection conn = Config.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1, id);
-            ps.executeUpdate();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
 }
