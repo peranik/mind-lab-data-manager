@@ -1,0 +1,8 @@
+view/CompletedExperimentsView.class
+model/CompletedExperiment.class
+view/ExperimentInsightDetailsView.class
+database/ExperimentInsightRepository.class
+database/MongoManager.class
+model/ExperimentInsight.class
+service/AiExperimentInsightGenerator.class
+database/CompletedExperimentDAO.class

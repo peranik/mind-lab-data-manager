@@ -24,7 +24,8 @@ public class AdminDashboard {
         hBox.getChildren().addAll(vboxDugmici);
         Button btnSesAnk=btnPregledSesijaAnketa();
         Button btnPregLab=btnPregledLaboratorija();
-        vboxDugmici.getChildren().addAll(btnSesAnk,btnPregLab);
+        Button btnMongoEksperimenti = btnPregledZavrsenihEksperimenata();
+        vboxDugmici.getChildren().addAll(btnSesAnk,btnPregLab,btnMongoEksperimenti);
         return hBox;
     }
     private Button btnPregledSesijaAnketa(){
@@ -46,5 +47,15 @@ public class AdminDashboard {
             form.show();
         });
         return btnPregledLaboratorija;
+    }
+    private Button btnPregledZavrsenihEksperimenata(){
+        Button button = new Button();
+        button.setText("Završeni eksperimenti i Mongo detalji");
+        button.setPrefWidth(400);
+        button.setOnAction(e -> {
+            CompletedExperimentsView form = new CompletedExperimentsView();
+            form.show();
+        });
+        return button;
     }
 }
