@@ -167,9 +167,26 @@ public class CompletedExperimentsView {
     }
 
     private void showError(String header, Exception ex) {
+        ex.printStackTrace();
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setHeaderText(header);
-        alert.setContentText(ex.getMessage());
+        alert.setContentText(getErrorMessage(ex));
         alert.showAndWait();
+    }
+
+    private String getErrorMessage(Throwable throwable) {
+        Throwable current = throwable;
+        while (current.getCause() != null) {
+            current = current.getCause();
+        }
+
+        String message = current.getMessage();
+        if (message == null || message.isBlank()) {
+            message = throwable.getMessage();
+        }
+
+        return message == null || message.isBlank()
+                ? current.getClass().getSimpleName()
+                : current.getClass().getSimpleName() + ": " + message;
     }
 }
