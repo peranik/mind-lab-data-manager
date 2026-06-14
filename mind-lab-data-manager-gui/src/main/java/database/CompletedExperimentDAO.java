@@ -72,63 +72,7 @@ public class CompletedExperimentDAO {
                     a.naziv AS naziv_ankete,
                     l.naziv AS naziv_laboratorije,
                     i.datum,
-                    i.status,
-                    (SELECT COUNT(*)
-                     FROM sesija s
-                     WHERE s.izvodjenje_id = i.izvodjenje_id) AS broj_sesija,
-                    (SELECT COUNT(DISTINCT su.ucesnik_id)
-                     FROM sesija s
-                     JOIN sesija_ucesnik su ON su.sesija_id = s.sesija_id
-                     WHERE s.izvodjenje_id = i.izvodjenje_id) AS broj_ucesnika,
-                    (SELECT COUNT(DISTINCT als.alat_id)
-                     FROM sesija s
-                     JOIN alat_sesija als ON als.sesija_id = s.sesija_id
-                     WHERE s.izvodjenje_id = i.izvodjenje_id) AS broj_alata,
-                    (SELECT MIN(s.vreme_pocetka)
-                     FROM sesija s
-                     WHERE s.izvodjenje_id = i.izvodjenje_id) AS prvo_vreme_pocetka,
-                    (SELECT MAX(s.vreme_zavrsetka)
-                     FROM sesija s
-                     WHERE s.izvodjenje_id = i.izvodjenje_id) AS poslednje_vreme_zavrsetka,
-                    (SELECT COALESCE(SUM(TIMESTAMPDIFF(MINUTE, s.vreme_pocetka, s.vreme_zavrsetka)), 0)
-                     FROM sesija s
-                     WHERE s.izvodjenje_id = i.izvodjenje_id) AS ukupno_trajanje_minuta,
-                    (SELECT ROUND(AVG(x.starost), 1)
-                     FROM (
-                         SELECT DISTINCT u.ucesnik_id, u.starost
-                         FROM sesija s
-                         JOIN sesija_ucesnik su ON su.sesija_id = s.sesija_id
-                         JOIN ucesnik u ON u.ucesnik_id = su.ucesnik_id
-                         WHERE s.izvodjenje_id = i.izvodjenje_id
-                     ) x) AS prosecna_starost,
-                    (SELECT COUNT(*)
-                     FROM (
-                         SELECT DISTINCT u.ucesnik_id
-                         FROM sesija s
-                         JOIN sesija_ucesnik su ON su.sesija_id = s.sesija_id
-                         JOIN ucesnik u ON u.ucesnik_id = su.ucesnik_id
-                         WHERE s.izvodjenje_id = i.izvodjenje_id
-                         AND u.pol = 'M'
-                     ) x) AS broj_muskih,
-                    (SELECT COUNT(*)
-                     FROM (
-                         SELECT DISTINCT u.ucesnik_id
-                         FROM sesija s
-                         JOIN sesija_ucesnik su ON su.sesija_id = s.sesija_id
-                         JOIN ucesnik u ON u.ucesnik_id = su.ucesnik_id
-                         WHERE s.izvodjenje_id = i.izvodjenje_id
-                         AND u.pol = 'Ž'
-                     ) x) AS broj_zenskih,
-                    (SELECT COUNT(*)
-                     FROM (
-                         SELECT DISTINCT u.ucesnik_id
-                         FROM sesija s
-                         JOIN sesija_ucesnik su ON su.sesija_id = s.sesija_id
-                         JOIN ucesnik u ON u.ucesnik_id = su.ucesnik_id
-                         WHERE s.izvodjenje_id = i.izvodjenje_id
-                         AND u.pol IS NOT NULL
-                         AND u.pol NOT IN ('M', 'Ž')
-                     ) x) AS broj_ostalih
+                    i.status
                 FROM izvodjenje i
                 JOIN anketa a ON a.anketa_id = i.anketa_id
                 JOIN laboratorija l ON l.lab_id = i.lab_id
@@ -153,16 +97,16 @@ public class CompletedExperimentDAO {
                         rs.getString("naziv_laboratorije"),
                         rs.getDate("datum"),
                         rs.getString("status"),
-                        rs.getInt("broj_sesija"),
-                        rs.getInt("broj_ucesnika"),
-                        rs.getInt("broj_alata"),
-                        rs.getTime("prvo_vreme_pocetka"),
-                        rs.getTime("poslednje_vreme_zavrsetka"),
-                        rs.getInt("ukupno_trajanje_minuta"),
-                        getNullableDouble(rs, "prosecna_starost"),
-                        rs.getInt("broj_muskih"),
-                        rs.getInt("broj_zenskih"),
-                        rs.getInt("broj_ostalih"),
+                        getSessionCount(executionId),
+                        getParticipantCount(executionId),
+                        getToolCount(executionId),
+                        getFirstStartTime(executionId),
+                        getLastEndTime(executionId),
+                        getTotalDurationMinutes(executionId),
+                        getAverageAge(executionId),
+                        getGenderCount(executionId, "M"),
+                        getGenderCount(executionId, "Ž"),
+                        getOtherGenderCount(executionId),
                         getSessionTimeline(executionId),
                         getToolNames(executionId),
                         getEducationBreakdown(executionId)
@@ -206,9 +150,74 @@ public class CompletedExperimentDAO {
         return (int) Math.max(millis / 60000L, 0L);
     }
 
-    private static Double getNullableDouble(ResultSet rs, String columnName) throws Exception {
-        double value = rs.getDouble(columnName);
-        return rs.wasNull() ? null : value;
+    private static int getSessionCount(int executionId) {
+        String sql = "SELECT COUNT(*) AS broj FROM sesija WHERE izvodjenje_id = ?";
+        return getIntValue(sql, executionId, "broj", "Neuspesno ucitavanje broja sesija.");
+    }
+
+    private static int getParticipantCount(int executionId) {
+        String sql = """
+                SELECT COUNT(DISTINCT su.ucesnik_id) AS broj
+                FROM sesija s
+                JOIN sesija_ucesnik su ON su.sesija_id = s.sesija_id
+                WHERE s.izvodjenje_id = ?
+                """;
+        return getIntValue(sql, executionId, "broj", "Neuspesno ucitavanje broja ucesnika.");
+    }
+
+    private static int getToolCount(int executionId) {
+        String sql = """
+                SELECT COUNT(DISTINCT als.alat_id) AS broj
+                FROM sesija s
+                JOIN alat_sesija als ON als.sesija_id = s.sesija_id
+                WHERE s.izvodjenje_id = ?
+                """;
+        return getIntValue(sql, executionId, "broj", "Neuspesno ucitavanje broja alata.");
+    }
+
+    private static Time getFirstStartTime(int executionId) {
+        String sql = "SELECT MIN(vreme_pocetka) AS vreme FROM sesija WHERE izvodjenje_id = ?";
+        return getTimeValue(sql, executionId, "vreme", "Neuspesno ucitavanje prvog vremena pocetka.");
+    }
+
+    private static Time getLastEndTime(int executionId) {
+        String sql = "SELECT MAX(vreme_zavrsetka) AS vreme FROM sesija WHERE izvodjenje_id = ?";
+        return getTimeValue(sql, executionId, "vreme", "Neuspesno ucitavanje poslednjeg vremena zavrsetka.");
+    }
+
+    private static int getTotalDurationMinutes(int executionId) {
+        String sql = """
+                SELECT COALESCE(SUM(TIMESTAMPDIFF(MINUTE, vreme_pocetka, vreme_zavrsetka)), 0) AS trajanje
+                FROM sesija
+                WHERE izvodjenje_id = ?
+                """;
+        return getIntValue(sql, executionId, "trajanje", "Neuspesno ucitavanje ukupnog trajanja.");
+    }
+
+    private static int getIntValue(String sql, int executionId, String columnName, String errorMessage) {
+        try (Connection conn = Config.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, executionId);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() ? rs.getInt(columnName) : 0;
+            }
+        } catch (Exception ex) {
+            throw new RuntimeException(errorMessage, ex);
+        }
+    }
+
+    private static Time getTimeValue(String sql, int executionId, String columnName, String errorMessage) {
+        try (Connection conn = Config.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, executionId);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() ? rs.getTime(columnName) : null;
+            }
+        } catch (Exception ex) {
+            throw new RuntimeException(errorMessage, ex);
+        }
     }
 
     private static List<String> getSessionTimeline(int executionId) {
@@ -249,6 +258,87 @@ public class CompletedExperimentDAO {
         }
 
         return timeline;
+    }
+
+    private static Double getAverageAge(int executionId) {
+        String sql = """
+                SELECT ROUND(AVG(x.starost), 1) AS prosecna_starost
+                FROM (
+                    SELECT DISTINCT u.ucesnik_id, u.starost
+                    FROM sesija s
+                    JOIN sesija_ucesnik su ON su.sesija_id = s.sesija_id
+                    JOIN ucesnik u ON u.ucesnik_id = su.ucesnik_id
+                    WHERE s.izvodjenje_id = ?
+                ) x
+                """;
+
+        try (Connection conn = Config.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, executionId);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    double value = rs.getDouble("prosecna_starost");
+                    return rs.wasNull() ? null : value;
+                }
+            }
+        } catch (Exception ex) {
+            throw new RuntimeException("Neuspesno ucitavanje prosecne starosti.", ex);
+        }
+
+        return null;
+    }
+
+    private static int getGenderCount(int executionId, String gender) {
+        String sql = """
+                SELECT COUNT(*) AS broj
+                FROM (
+                    SELECT DISTINCT u.ucesnik_id
+                    FROM sesija s
+                    JOIN sesija_ucesnik su ON su.sesija_id = s.sesija_id
+                    JOIN ucesnik u ON u.ucesnik_id = su.ucesnik_id
+                    WHERE s.izvodjenje_id = ?
+                    AND u.pol = ?
+                ) x
+                """;
+
+        try (Connection conn = Config.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, executionId);
+            ps.setString(2, gender);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() ? rs.getInt("broj") : 0;
+            }
+        } catch (Exception ex) {
+            throw new RuntimeException("Neuspesno ucitavanje polne strukture.", ex);
+        }
+    }
+
+    private static int getOtherGenderCount(int executionId) {
+        String sql = """
+                SELECT COUNT(*) AS broj
+                FROM (
+                    SELECT DISTINCT u.ucesnik_id
+                    FROM sesija s
+                    JOIN sesija_ucesnik su ON su.sesija_id = s.sesija_id
+                    JOIN ucesnik u ON u.ucesnik_id = su.ucesnik_id
+                    WHERE s.izvodjenje_id = ?
+                    AND u.pol IS NOT NULL
+                    AND u.pol NOT IN ('M', 'Ž')
+                ) x
+                """;
+
+        try (Connection conn = Config.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, executionId);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() ? rs.getInt("broj") : 0;
+            }
+        } catch (Exception ex) {
+            throw new RuntimeException("Neuspesno ucitavanje polne strukture.", ex);
+        }
     }
 
     private static List<String> getToolNames(int executionId) {
