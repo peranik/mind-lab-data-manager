@@ -377,8 +377,6 @@ END $$
 
 DELIMITER ;
 
-DELIMITER $$
-
 -- Procedura kojom se menja vreme u sesiji
 
 DROP PROCEDURE IF EXISTS izmeni_vreme_sesije;
@@ -645,10 +643,9 @@ CREATE PROCEDURE sp_update_session(
 )
 BEGIN
     UPDATE sesija
-    SET datum = p_datum,
-        vreme = p_vreme
-    WHERE id = p_id;
-END;
+    SET vreme_pocetka = STR_TO_DATE(p_vreme, '%H:%i:%s')
+    WHERE sesija_id = p_id;
+END//
 
 DELIMITER ;
 -- ============================================
