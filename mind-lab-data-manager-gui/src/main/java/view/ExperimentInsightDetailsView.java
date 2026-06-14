@@ -40,8 +40,6 @@ public class ExperimentInsightDetailsView {
         summaryGrid.addRow(2, new Label("Naziv ankete:"), new Label(insight.getSurveyName()));
         summaryGrid.addRow(3, new Label("Laboratorija:"), new Label(insight.getLaboratoryName()));
         summaryGrid.addRow(4, new Label("Datum:"), new Label(insight.getExecutionDate()));
-        summaryGrid.addRow(5, new Label("Generator:"), new Label(insight.getGeneratorName()));
-        summaryGrid.addRow(6, new Label("Generisano:"), new Label(insight.getGeneratedAt()));
 
         TextArea summaryArea = buildTextArea(insight.getQualitativeSummary());
         TextArea methodologyArea = buildTextArea(insight.getMethodologicalAssessment() + System.lineSeparator()
@@ -55,7 +53,7 @@ public class ExperimentInsightDetailsView {
         ListView<String> educationView = buildListView(insight.getEducationBreakdown());
 
         Accordion accordion = new Accordion(
-                new TitledPane("AI sažetak", summaryArea),
+                new TitledPane("Sažetak", summaryArea),
                 new TitledPane("Ključna opažanja", observationsView),
                 new TitledPane("Kvantitativni rezultati", metricsArea),
                 new TitledPane("Metodološka procena", methodologyArea),

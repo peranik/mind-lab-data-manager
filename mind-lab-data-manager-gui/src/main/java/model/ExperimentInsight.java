@@ -12,8 +12,6 @@ public class ExperimentInsight {
     private final String laboratoryName;
     private final String executionDate;
     private final String status;
-    private final String generatorName;
-    private final String generatedAt;
     private final String qualitativeSummary;
     private final String methodologicalAssessment;
     private final String recommendation;
@@ -40,8 +38,6 @@ public class ExperimentInsight {
                              String laboratoryName,
                              String executionDate,
                              String status,
-                             String generatorName,
-                             String generatedAt,
                              String qualitativeSummary,
                              String methodologicalAssessment,
                              String recommendation,
@@ -67,8 +63,6 @@ public class ExperimentInsight {
         this.laboratoryName = laboratoryName;
         this.executionDate = executionDate;
         this.status = status;
-        this.generatorName = generatorName;
-        this.generatedAt = generatedAt;
         this.qualitativeSummary = qualitativeSummary;
         this.methodologicalAssessment = methodologicalAssessment;
         this.recommendation = recommendation;
@@ -112,14 +106,6 @@ public class ExperimentInsight {
 
     public String getStatus() {
         return status;
-    }
-
-    public String getGeneratorName() {
-        return generatorName;
-    }
-
-    public String getGeneratedAt() {
-        return generatedAt;
     }
 
     public String getQualitativeSummary() {

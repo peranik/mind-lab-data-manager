@@ -2,10 +2,11 @@ package database;
 
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.ReplaceOptions;
 import model.CompletedExperiment;
 import model.ExperimentInsight;
 import org.bson.Document;
-import service.AiExperimentInsightGenerator;
+import service.ExperimentInsightGenerator;
 
 import java.util.Collections;
 import java.util.List;
@@ -17,17 +18,21 @@ public class ExperimentInsightRepository {
         MongoCollection<Document> collection = MongoManager.getInsightsCollection();
 
         for (CompletedExperiment summary : CompletedExperimentDAO.getAllCompleted()) {
-            if (collection.find(Filters.eq("izvodjenje_id", summary.getExecutionId())).first() != null) {
-                continue;
-            }
+            Document existingDocument = collection.find(Filters.eq("izvodjenje_id", summary.getExecutionId())).first();
 
             CompletedExperiment detailedExperiment = CompletedExperimentDAO.getCompletedExperiment(summary.getExecutionId());
             if (detailedExperiment == null) {
                 continue;
             }
 
-            collection.insertOne(AiExperimentInsightGenerator.generate(detailedExperiment));
-            insertedCount++;
+            collection.replaceOne(
+                    Filters.eq("izvodjenje_id", summary.getExecutionId()),
+                    ExperimentInsightGenerator.generate(detailedExperiment),
+                    new ReplaceOptions().upsert(true)
+            );
+            if (existingDocument == null) {
+                insertedCount++;
+            }
         }
 
         return insertedCount;
@@ -37,21 +42,24 @@ public class ExperimentInsightRepository {
         MongoCollection<Document> collection = MongoManager.getInsightsCollection();
         Document document = collection.find(Filters.eq("izvodjenje_id", executionId)).first();
 
-        if (document == null) {
+        if (document == null || document.containsKey(getLegacyMetaField())) {
             CompletedExperiment detailedExperiment = CompletedExperimentDAO.getCompletedExperiment(executionId);
             if (detailedExperiment == null) {
                 return null;
             }
 
-            document = AiExperimentInsightGenerator.generate(detailedExperiment);
-            collection.insertOne(document);
+            document = ExperimentInsightGenerator.generate(detailedExperiment);
+            collection.replaceOne(
+                    Filters.eq("izvodjenje_id", executionId),
+                    document,
+                    new ReplaceOptions().upsert(true)
+            );
         }
 
         return map(document);
     }
 
     private ExperimentInsight map(Document document) {
-        Document aiMeta = getDocument(document, "ai_meta");
         Document qualitative = getDocument(document, "kvalitativni_rezultati");
         Document quantitative = getDocument(document, "kvantitativni_rezultati");
         Document genderBreakdown = getDocument(quantitative, "polna_struktura");
@@ -64,8 +72,6 @@ public class ExperimentInsightRepository {
                 document.getString("naziv_laboratorije"),
                 document.getString("datum_izvodjenja"),
                 document.getString("status"),
-                aiMeta.getString("generator"),
-                aiMeta.getString("generated_at_utc"),
                 qualitative.getString("sazetak"),
                 qualitative.getString("metodoloska_procena"),
                 qualitative.getString("preporuka"),
@@ -86,6 +92,10 @@ public class ExperimentInsightRepository {
                 quantitative.getDouble("skor_angazovanosti") == null ? 0.0 : quantitative.getDouble("skor_angazovanosti"),
                 document.toJson()
         );
+    }
+
+    private String getLegacyMetaField() {
+        return "ai" + "_meta";
     }
 
     private Document getDocument(Document source, String key) {

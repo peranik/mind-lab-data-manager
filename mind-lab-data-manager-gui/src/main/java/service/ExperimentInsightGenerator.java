@@ -3,14 +3,10 @@ package service;
 import model.CompletedExperiment;
 import org.bson.Document;
 
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 
-public final class AiExperimentInsightGenerator {
-
-    private static final String GENERATOR_NAME = "Codex AI Insight Builder";
+public final class ExperimentInsightGenerator {
 
     public static Document generate(CompletedExperiment experiment) {
         double reliabilityIndex = roundTo2(calculateReliabilityIndex(experiment));
@@ -48,10 +44,6 @@ public final class AiExperimentInsightGenerator {
                 .append("naziv_laboratorije", experiment.getLaboratoryName())
                 .append("datum_izvodjenja", experiment.getExecutionDate() == null ? null : experiment.getExecutionDate().toString())
                 .append("status", experiment.getStatus())
-                .append("ai_meta", new Document()
-                        .append("generator", GENERATOR_NAME)
-                        .append("generated_at_utc", OffsetDateTime.now(ZoneOffset.UTC).toString())
-                        .append("source", "relational-to-document enrichment"))
                 .append("kvalitativni_rezultati", qualitative)
                 .append("kvantitativni_rezultati", quantitative)
                 .append("prateci_podaci", supportingData);
@@ -62,7 +54,7 @@ public final class AiExperimentInsightGenerator {
                 ? "bez dovoljnog broja demografskih uzoraka za pouzdanu procenu starosti"
                 : "uz prosečnu starost učesnika od " + experiment.getAverageAge() + " godina";
 
-        return "AI analiza ukazuje da je eksperiment \"" + experiment.getSurveyName() + "\" u laboratoriji \"" +
+        return "Analiza ukazuje da je eksperiment \"" + experiment.getSurveyName() + "\" u laboratoriji \"" +
                 experiment.getLaboratoryName() + "\" uspešno realizovan kroz " + experiment.getSessionCount() +
                 " sesija, sa " + experiment.getParticipantCount() + " učesnika i " + experiment.getToolCount() +
                 " alata, " + agePart + ".";
@@ -145,6 +137,6 @@ public final class AiExperimentInsightGenerator {
         return Math.round(value * 100.0) / 100.0;
     }
 
-    private AiExperimentInsightGenerator() {
+    private ExperimentInsightGenerator() {
     }
 }

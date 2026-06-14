@@ -5,7 +5,6 @@
 /home/nikola/Documents/projekat baze/mind-lab-data-manager/mind-lab-data-manager-gui/src/main/java/model/Role.java
 /home/nikola/Documents/projekat baze/mind-lab-data-manager/mind-lab-data-manager-gui/src/main/java/database/LaboratorijaDAO.java
 /home/nikola/Documents/projekat baze/mind-lab-data-manager/mind-lab-data-manager-gui/src/main/java/model/ExperimentInsight.java
-/home/nikola/Documents/projekat baze/mind-lab-data-manager/mind-lab-data-manager-gui/src/main/java/service/AiExperimentInsightGenerator.java
 /home/nikola/Documents/projekat baze/mind-lab-data-manager/mind-lab-data-manager-gui/src/main/java/view/UkloniUcesnikaSesijaView.java
 /home/nikola/Documents/projekat baze/mind-lab-data-manager/mind-lab-data-manager-gui/src/main/java/view/SessionEditForm.java
 /home/nikola/Documents/projekat baze/mind-lab-data-manager/mind-lab-data-manager-gui/src/main/java/view/PromeniVremeView.java
@@ -22,6 +21,7 @@
 /home/nikola/Documents/projekat baze/mind-lab-data-manager/mind-lab-data-manager-gui/src/main/java/view/SesijaEksperimentView.java
 /home/nikola/Documents/projekat baze/mind-lab-data-manager/mind-lab-data-manager-gui/src/main/java/app/App.java
 /home/nikola/Documents/projekat baze/mind-lab-data-manager/mind-lab-data-manager-gui/src/main/java/view/DodajUcesnikaSesijaView.java
+/home/nikola/Documents/projekat baze/mind-lab-data-manager/mind-lab-data-manager-gui/src/main/java/service/ExperimentInsightGenerator.java
 /home/nikola/Documents/projekat baze/mind-lab-data-manager/mind-lab-data-manager-gui/src/main/java/view/ExperimentInsightDetailsView.java
 /home/nikola/Documents/projekat baze/mind-lab-data-manager/mind-lab-data-manager-gui/src/main/java/data/UserFileDB.java
 /home/nikola/Documents/projekat baze/mind-lab-data-manager/mind-lab-data-manager-gui/src/main/java/model/Alat.java
